@@ -77,22 +77,36 @@ class Genome(object):
 	def good_inv_pos(self, s, e):
 		# checks is inversion positions are ok.
 		
+		# check if pos is in gene
+		if self.pos_in_gene(s) or self.pos_in_gene(e) :
+			return False 
+
+		# check the distance between barriers and gene
 		s_gd, s_bd = self.nearest_obj_distance(s)
 		e_gd, e_bd = self.nearest_obj_distance(e)
-
+		
 		return True if s_gd+e_bd > self.sec_dist and s_bd+e_gd > self.sec_dist else False
+
+	def pos_in_gene(self, p):
+		# Returns True if position is in a gene
+
+		for i, row in self.gene_info.iterrows():
+			if p>row['TSS_pos'] and p<row['TTS_pos']:
+				return True
+		return False
 
 
 	def get_inv_pos(self):
 		# Returns 2 good positions for inversion
 
-		s,e = np.random.randint(0, self.Size, size=2)
+		s,e = np.sort(np.random.randint(0, self.Size, size=2))
 		i=0
 		while not self.good_inv_pos(s,e):
-			s, e = np.random.randint(0, self.Size, size=2)
+			s,e = np.sort(np.random.randint(0, self.Size, size=2))
 			i+=1
 		
 		return s,e
+	
 
 
 
