@@ -83,6 +83,16 @@ class Genome(object):
 		return True if s_gd+e_bd > self.sec_dist and s_bd+e_gd > self.sec_dist else False
 
 
+	def get_inv_pos(self):
+		# Returns 2 good positions for inversion
+
+		s,e = np.random.randint(0, self.Size, size=2)
+		i=0
+		while not self.good_inv_pos(s,e):
+			s, e = np.random.randint(0, self.Size, size=2)
+			i+=1
+		
+		return s,e
 
 
 
