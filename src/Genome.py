@@ -3,6 +3,7 @@
 
 import pandas as pd
 import numpy as np
+import os
 
 
 class Genome(object):
@@ -17,6 +18,7 @@ class Genome(object):
 		self.gene_info = TSS.merge(TTS)
 		self.prot = pd.read_table(path_init+'/prot.dat', header=0)
 		self.env = pd.read_table(path_init+'/environment.dat')
+		self.path_init = path_init
 
 	def __str__(self):
 		s = "Genome Info :\n--------------\n"
@@ -170,6 +172,30 @@ class Genome(object):
 
 		self.Size -= l
 		return s,l
+
+
+	def write_sim_files(self, path_to_sim):
+		#TSS
+		self.gene_info.to_csv(path_to_sim+'/TSS.dat', sep="\t", columns=['TUindex', 'TUorient', 'TSS_pos', 'TSS_strength'], index=False)
+		self.gene_info.to_csv(path_to_sim+'/TTS.dat', sep="\t", columns=['TUindex', 'TUorient', 'TTS_pos', 'TTS_proba_off'], index=False)
+		self.prot.to_csv(path_to_sim+'/prot.dat', sep="\t", index=False)
+
+		with open(self.path_init+'/tousgenesidentiques.gff', 'r') as f:
+			gff = f.readlines()
+
+		gff[3] = '##sequence-region\ttousgenesidentiques\t1\t'+str(self.Size)+'\n'
+		gff[4] = 'tousgenesidentiques\tRefSeq\tregion\t1\t'+str(self.Size)+'\t.\t+\t.\tID=id0;Name=tousgenesidentiques\n'
+
+
+		with open(path_to_sim+'/tousgenesidentiques.gff', 'w') as f:
+			f.writelines(gff)
+
+
+
+
+
+
+
 
 
 
