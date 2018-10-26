@@ -10,6 +10,7 @@ class Genome(object):
 	def __init__(self, Size, path_init):
 		self.Size = Size
 		self.sec_dist = 60 # security distance of prot and genes
+		self.indel_var = 0
 
 		TSS = pd.read_table(path_init+'/TSS.dat', header=0)
 		TTS = pd.read_table(path_init+'/TTS.dat', header=0)
@@ -107,6 +108,10 @@ class Genome(object):
 		
 		return s,e
 	
+
+	def frag_length(self):
+		return self.sec_dist + np.random.randint(-self.indel_var,self.indel_var)
+
 
 
 
