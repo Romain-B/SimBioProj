@@ -33,5 +33,39 @@ G = Genome(30000, '../sim_files/init')
 #print(G.good_inv_pos(2500, 3500))
 #print(G.good_inv_pos(2001, 2990))
 
-G.inversion()
-G.inversion()
+##Testing inversion:
+#print(G)
+#G.inversion()
+#print(G)
+#G.inversion()
+
+# print(G.good_inv_pos(2500, 3500))
+# print(G.good_inv_pos(2001, 2990))
+
+# print(G.frag_length())
+# print(G.frag_length())
+# print(G.frag_length())
+print("######################################\n")
+print("INSERTION\n")
+
+print(G.insertion())
+print(G)
+
+print("######################################\n")
+print("INSERTION\n")
+
+print(G.insertion())
+print(G)
+
+print("######################################\n")
+print("DELETION\n")
+
+
+print(G.deletion())
+print(G)
+
+print("######################################\n")
+print("DELETION\n")
+
+print(G.deletion())
+print(G)

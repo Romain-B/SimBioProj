@@ -8,106 +8,177 @@ import numpy as np
 class Genome(object):
     """class containing genome of target individual"""
 
-    def __init__(self, Size, path_init):
-        self.Size = Size
-        self.sec_dist = 60 # security distance of prot and genes
+	def __init__(self, Size, path_init):
+		self.Size = Size
+		self.sec_dist = 60 # security distance of prot and genes
+		self.indel_var = 0
+
+		TSS = pd.read_table(path_init+'/TSS.dat', header=0)
+		TTS = pd.read_table(path_init+'/TTS.dat', header=0)
+		self.gene_info = TSS.merge(TTS)
+		self.prot = pd.read_table(path_init+'/prot.dat', header=0)
+		self.env = pd.read_table(path_init+'/environment.dat')
+
+	def __str__(self):
+		s = "Genome Info :\n--------------\n"
+		s += "Size : "+str(self.Size)+"\n"
+		s += "Gene Info : \n"+str(self.gene_info)+"\n\n"
+		s += "Barriers : \n"+str(self.prot)+"\n\n"	
+		return s
+
+
+	def nearest_obj_distance(self, p):
+		"""Needed to ensure that genes and barriers don't become less that sec_dist apart."""
+		# dist gene, dist barrier
+		d_g = self.Size
+		d_b = self.Size
+
+		for i, row in self.gene_info.iterrows():
+			if abs(row['TSS_pos'] - p) < d_g:
+				d_g = abs(row['TSS_pos'] - p)
+			if abs(row['TTS_pos'] - p) < d_g:
+				d_g = abs(row['TTS_pos'] - p)
+
+		for i, row in self.prot.iterrows():
+			if abs(row['prot_pos'] - p) < d_b:
+				d_b = abs(row['prot_pos'] - p)
+
+		
+		####### for extremities of genome cases :
+
+		# max pos of a gene
+		gmax = max(max(self.gene_info['TTS_pos']),max(self.gene_info['TSS_pos'])) 
+		#idem min
+		gmin = min(min(self.gene_info['TTS_pos']),min(self.gene_info['TSS_pos']))
+
+
+		if p > gmax :
+			if self.Size-p+gmin < d_g:
+				d_g = self.Size-p+gmin
+
+		if p < gmin :
+			if p+self.Size-gmax < d_g:
+				d_g = p+self.Size-gmax
+
+
+		# same for barriers
+		bmax = max(self.prot['prot_pos']) 
+		bmin = min(self.prot['prot_pos']) 
+
+		if p > bmax :
+			if self.Size-p+bmin < d_b:
+				d_b = self.Size-p+bmin
+
+		if p < bmin :
+			if p+self.Size-bmax < d_b:
+				d_b = p+self.Size-bmax
+
+		return d_g, d_b
+
+
+	def good_inv_pos(self, s, e):
+		"""checks is inversion positions are ok."""
+		
+		# check if pos is in gene
+		if self.pos_in_gene(s) or self.pos_in_gene(e) :
+			return False 
+
+		# check the distance between barriers and gene
+		s_gd, s_bd = self.nearest_obj_distance(s)
+		e_gd, e_bd = self.nearest_obj_distance(e)
+		
+		return True if s_gd+e_bd > self.sec_dist and s_bd+e_gd > self.sec_dist else False
+
+	def pos_in_gene(self, p):
+		"""Returns True if position is in a gene"""
+
+		for i, row in self.gene_info.iterrows():
+			if p>row['TSS_pos'] and p<row['TTS_pos']:
+				return True
+		return False
+
+
+	def get_inv_pos(self):
+		"""Returns 2 good positions for inversion"""
+
+		s,e = np.sort(np.random.randint(0, self.Size, size=2))
+		i=0
+		while not self.good_inv_pos(s,e):
+			s,e = np.sort(np.random.randint(0, self.Size, size=2))
+			i+=1
+		
+		return s,e
+	
+
+	def frag_length(self):
+        """Returns size of fragment for deletion"""
         
-        TSS = pd.read_table(path_init+'/TSS.dat', header=0)
-        TTS = pd.read_table(path_init+'/TTS.dat', header=0)
-        self.gene_info = TSS.merge(TTS)
-        self.prot = pd.read_table(path_init+'/prot.dat', header=0)
-        self.env = pd.read_table(path_init+'/environment.dat')
-
-    def __str__(self):
-        s = "Genome Info :\n--------------\n"
-        s += "Size : "+str(self.Size)+"\n"
-        s += "Gene Info : \n"+str(self.gene_info)+"\n\n"
-        s += "Barriers : \n"+str(self.prot)+"\n\n"    
-        return s
+		var = 0 if self.indel_var==0 else np.random.randint(-self.indel_var,self.indel_var)
+		return self.sec_dist + var
 
 
-    def nearest_obj_distance(self, p):
-        """Needed to ensure that genes and barriers don't become less that sec_dist apart."""
-        # dist gene, dist barrier
-        d_g = self.Size
-        d_b = self.Size
-
-        for i, row in self.gene_info.iterrows():
-            if abs(row['TSS_pos'] - p) < d_g:
-                d_g = abs(row['TSS_pos'] - p)
-            if abs(row['TTS_pos'] - p) < d_g:
-                d_g = abs(row['TTS_pos'] - p)
-
-        for i, row in self.prot.iterrows():
-            if abs(row['prot_pos'] - p) < d_b:
-                d_b = abs(row['prot_pos'] - p)
-
+	def insertion(self):
+        """insertion of fragment of random length"""
         
-        ####### for extremities of genome cases :
+		p = np.random.randint(0, self.Size)
 
-        # max pos of a gene
-        gmax = max(max(self.gene_info['TTS_pos']),max(self.gene_info['TSS_pos'])) 
-        #idem min
-        gmin = min(min(self.gene_info['TTS_pos']),min(self.gene_info['TSS_pos']))
+		while self.pos_in_gene(p) :
+			p = np.random.randint(0, self.Size)
 
+		l = self.frag_length()
 
-        if p > gmax :
-            if self.Size-p+gmin < d_g:
-                d_g = self.Size-p+gmin
+		# shift genes and barriers
+		for i, row in self.gene_info.iterrows():
+			if row['TSS_pos'] > p:
+				self.gene_info.iloc[i, self.gene_info.columns.get_loc('TSS_pos')] += l
+			if row['TTS_pos'] > p:
+				self.gene_info.iloc[i, self.gene_info.columns.get_loc('TTS_pos')] += l
 
-        if p < gmin :
-            if p+self.Size-gmax < d_g:
-                d_g = p+self.Size-gmax
+		for i, row in self.prot.iterrows():
+			if row['prot_pos'] > p:
+				self.prot.iloc[i, self.prot.columns.get_loc('prot_pos')]+= l
 
-
-        # same for barriers
-        bmax = max(self.prot['prot_pos']) 
-        bmin = min(self.prot['prot_pos']) 
-
-        if p > bmax :
-            if self.Size-p+bmin < d_b:
-                d_b = self.Size-p+bmin
-
-        if p < bmin :
-            if p+self.Size-bmax < d_b:
-                d_b = p+self.Size-bmax
-
-        return d_g, d_b
+		self.Size += l
+		return p,l
 
 
-    def good_inv_pos(self, s, e):
-        """checks is inversion positions are ok."""
+	def barr_between_pos(self, s, e):
+        """Returns True if there is a barrier between argument positions"""
         
-        # check if pos is in gene
-        if self.pos_in_gene(s) or self.pos_in_gene(e) :
-            return False 
+		for i, row in self.prot.iterrows():
+			if row['prot_pos'] > s and row['prot_pos'] <= e:
+				return True
+		return False
 
-        # check the distance between barriers and gene
-        s_gd, s_bd = self.nearest_obj_distance(s)
-        e_gd, e_bd = self.nearest_obj_distance(e)
+	def deletion(self):
+        """deletion of fragment"""
         
-        return True if s_gd+e_bd > self.sec_dist and s_bd+e_gd > self.sec_dist else False
+		l = self.frag_length()
 
-    def pos_in_gene(self, p):
-        """Returns True if position is in a gene"""
+		# find good del position
+		p1 = np.random.randint(0, self.Size)
+		p2 = p1 + np.random.choice([-1,1])*l
+		s, e = np.sort([p1,p2])	
 
-        for i, row in self.gene_info.iterrows():
-            if p>row['TSS_pos'] and p<row['TTS_pos']:
-                return True
-        return False
+		while not self.good_inv_pos(s,e) and not self.barr_between_pos(s,e):
+			p1 = np.random.randint(0, self.Size)
+			p2 = p1 + np.random.choice([-1,1])*l
+			s, e = np.sort([p1,p2])	
 
+		# shift genes and barriers
+		for i, row in self.gene_info.iterrows():
+			if row['TSS_pos'] > s:
+				self.gene_info.iloc[i, self.gene_info.columns.get_loc('TSS_pos')] -= l
+			if row['TTS_pos'] > s:
+				self.gene_info.iloc[i, self.gene_info.columns.get_loc('TTS_pos')] -= l
 
-    def get_inv_pos(self):
-        """Returns 2 good positions for inversion"""
+		for i, row in self.prot.iterrows():
+			if row['prot_pos'] > s:
+				self.prot.iloc[i, self.prot.columns.get_loc('prot_pos')]-= l
 
-        s,e = np.sort(np.random.randint(0, self.Size, size=2))
-        i=0
-        while not self.good_inv_pos(s,e):
-            s,e = np.sort(np.random.randint(0, self.Size, size=2))
-            i+=1
-        
-        return s,e
-    
+		self.Size -= l
+		return s,l
+
     def find_genes(self,s,e):
         """Returns list of all genes between positions s and e"""
         
@@ -126,9 +197,6 @@ class Genome(object):
         
         start_inv,end_inv = self.get_inv_pos()
         genes_to_inv = self.find_genes(start_inv,end_inv)
-        print("Before:")
-        print(self.gene_info)
-        print("Inversion starts at "+str(start_inv)+" and ends at "+str(end_inv))
         for gene in genes_to_inv:
             ind = gene["TUindex"]
             
@@ -147,14 +215,13 @@ class Genome(object):
         last_gene = genes_to_inv[-1]["TUindex"]
         self.gene_info = pd.concat([self.gene_info.iloc[0:first_gene],self.gene_info.iloc[last_gene:first_gene-1:-1],self.gene_info[last_gene+1:]])
         self.gene_info["TUindex"] = list(range(len(self.gene_info["TUindex"])))
-        print("after:")
-        print(self.gene_info)
 
 
 
 
-        
-        
+
+
+		
 # class Gene:
 #     """docstring for Genome"""
 
