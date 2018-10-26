@@ -24,5 +24,16 @@ if False :
 G = Genome(30000, '../sim_files/init')
 print(G)
 
-print(G.good_inv_pos(2500, 3500))
-print(G.good_inv_pos(2001, 2990))
+# print(G.good_inv_pos(2500, 3500))
+# print(G.good_inv_pos(2001, 2990))
+
+# print(G.frag_length())
+# print(G.frag_length())
+# print(G.frag_length())
+
+print(G.insertion())
+print(G)
+
+
+print(G.insertion())
+print(G)
