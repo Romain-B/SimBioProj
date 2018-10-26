@@ -110,8 +110,30 @@ class Genome(object):
 	
 
 	def frag_length(self):
-		return self.sec_dist + np.random.randint(-self.indel_var,self.indel_var)
+		var = 0 if self.indel_var==0 else np.random.randint(-self.indel_var,self.indel_var)
+		return self.sec_dist + var
 
+
+	def insertion(self):
+		p = np.random.randint(0, self.Size)
+
+		while self.pos_in_gene(p) :
+			p = np.random.randint(0, self.Size)
+
+		l = self.frag_length()
+
+		for i, row in self.gene_info.iterrows():
+			if row['TSS_pos'] > p:
+				self.gene_info.iloc[i, self.gene_info.columns.get_loc('TSS_pos')] += l
+			if row['TTS_pos'] > p:
+				self.gene_info.iloc[i, self.gene_info.columns.get_loc('TTS_pos')] += l
+
+		for i, row in self.prot.iterrows():
+			if row['prot_pos'] > p:
+				self.prot.iloc[i, self.prot.columns.get_loc('prot_pos')]+= l
+
+		self.Size += l
+		return p,l
 
 
 
