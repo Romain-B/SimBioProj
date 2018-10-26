@@ -34,23 +34,28 @@ print("######################################\n")
 print("INSERTION\n")
 
 print(G.insertion())
-print(G)
+# print(G)
 
 print("######################################\n")
 print("INSERTION\n")
 
 print(G.insertion())
-print(G)
+# print(G)
 
 print("######################################\n")
 print("DELETION\n")
 
 
 print(G.deletion())
-print(G)
+# print(G)
 
 print("######################################\n")
 print("DELETION\n")
 
 print(G.deletion())
-print(G)
+print(G.deletion())
+# print(G)
+
+
+G.write_sim_files('../sim_files/current')
+
