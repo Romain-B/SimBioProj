@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from Genome import Genome
 
-if False :
+if False:
   path = '../sim_files/init/TSS.dat'
 
   TSS = pd.read_table(path, header=0)
@@ -18,11 +18,26 @@ if False :
   # print(TTS)
 
   gene_info = TSS.merge(TTS)
+  
+  
 
-  print(gene_info)
+  
+      
+
+
+  
 
 G = Genome(30000, '../sim_files/init')
-print(G)
+#print(G)
+
+#print(G.good_inv_pos(2500, 3500))
+#print(G.good_inv_pos(2001, 2990))
+
+##Testing inversion:
+#print(G)
+#G.inversion()
+#print(G)
+#G.inversion()
 
 # print(G.good_inv_pos(2500, 3500))
 # print(G.good_inv_pos(2001, 2990))
