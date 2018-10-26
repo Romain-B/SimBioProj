@@ -30,10 +30,27 @@ print(G)
 # print(G.frag_length())
 # print(G.frag_length())
 # print(G.frag_length())
+print("######################################\n")
+print("INSERTION\n")
 
 print(G.insertion())
 print(G)
 
+print("######################################\n")
+print("INSERTION\n")
 
 print(G.insertion())
+print(G)
+
+print("######################################\n")
+print("DELETION\n")
+
+
+print(G.deletion())
+print(G)
+
+print("######################################\n")
+print("DELETION\n")
+
+print(G.deletion())
 print(G)
