@@ -122,6 +122,7 @@ class Genome(object):
 
 		l = self.frag_length()
 
+		# shift genes and barriers
 		for i, row in self.gene_info.iterrows():
 			if row['TSS_pos'] > p:
 				self.gene_info.iloc[i, self.gene_info.columns.get_loc('TSS_pos')] += l
@@ -134,6 +135,44 @@ class Genome(object):
 
 		self.Size += l
 		return p,l
+
+
+	def barr_between_pos(self, s, e):
+		for i, row in self.prot.iterrows():
+			if row['prot_pos'] > s and row['prot_pos'] <= e:
+				return True
+		return False
+
+	def deletion(self):
+
+		l = self.frag_length()
+
+		# find good del position
+		p1 = np.random.randint(0, self.Size)
+		p2 = p1 + np.random.choice([-1,1])*l
+		s, e = np.sort([p1,p2])	
+
+		while not self.good_inv_pos(s,e) and not self.barr_between_pos(s,e):
+			p1 = np.random.randint(0, self.Size)
+			p2 = p1 + np.random.choice([-1,1])*l
+			s, e = np.sort([p1,p2])	
+
+		# shift genes and barriers
+		for i, row in self.gene_info.iterrows():
+			if row['TSS_pos'] > s:
+				self.gene_info.iloc[i, self.gene_info.columns.get_loc('TSS_pos')] -= l
+			if row['TTS_pos'] > s:
+				self.gene_info.iloc[i, self.gene_info.columns.get_loc('TTS_pos')] -= l
+
+		for i, row in self.prot.iterrows():
+			if row['prot_pos'] > s:
+				self.prot.iloc[i, self.prot.columns.get_loc('prot_pos')]-= l
+
+		self.Size -= l
+		return s,l
+
+
+
 
 
 
