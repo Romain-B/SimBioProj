@@ -94,8 +94,12 @@ class Genome(object):
     """Returns True if position is in a gene"""
 
     for i, row in self.gene_info.iterrows():
-      if p>row['TSS_pos'] and p<row['TTS_pos']:
-        return True
+      if row["TUorient"] == "+":
+        if p>row['TSS_pos'] and p<row['TTS_pos']:
+          return True
+      else:
+        if p>row['TTS_pos'] and p<row['TSS_pos']:
+          return True
     return False
 
 
@@ -150,6 +154,15 @@ class Genome(object):
       if row['prot_pos'] > s and row['prot_pos'] <= e:
         return True
     return False
+  
+  def get_barr_between_pos(self, s, e):
+    """Returns indices of barriers between argument positions"""
+        
+    barrs = []
+    for i, row in self.prot.iterrows():
+      if row['prot_pos'] > s and row['prot_pos'] <= e:
+        barrs.append(i)
+    return barrs
 
   def deletion(self):
     """deletion of fragment"""
@@ -187,7 +200,7 @@ class Genome(object):
     for index,row in self.gene_info.iterrows(): #iterate over all start positions
       start_gene = row["TSS_pos"]
       if start_gene >= s and start_gene <= e:
-        genes_list.append(row)
+        genes_list.append(index)
     #no need to check for end of genes because find_genes is used only
     #for inversions and inversions will never cut a gene
     return genes_list
@@ -197,28 +210,32 @@ class Genome(object):
     """inversion between two good positions given by get_inv_pos"""
     
     start_inv,end_inv = self.get_inv_pos()
+    print(start_inv,end_inv)
     genes_to_inv = self.find_genes(start_inv,end_inv)
+    print(genes_to_inv)
+    genes_copy = self.gene_info.copy()
     if len(genes_to_inv) :
-      for gene in genes_to_inv:
-        ind = gene["TUindex"]
-        
+      for ind in genes_to_inv:
+        gene = self.gene_info.iloc[ind,:].copy()
         #change gene start and gene end
-        self.gene_info.at[ind,"TSS_pos"] = end_inv - (gene["TSS_pos"] - start_inv)
-        self.gene_info.at[ind,"TTS_pos"] = start_inv + end_inv - gene["TTS_pos"]
+        genes_copy.at[ind,"TSS_pos"] = end_inv - (gene["TSS_pos"] - start_inv)
+        genes_copy.at[ind,"TTS_pos"] = start_inv + end_inv - gene["TTS_pos"]
         
         #change gene orientation
         if gene["TUorient"] == "+":
-          self.gene_info.at[ind,"TUorient"] = "-"
+          genes_copy.at[ind,"TUorient"] = "-"
         else:
-          self.gene_info.at[ind,"TUorient"] = "+"
+          genes_copy.at[ind,"TUorient"] = "+"
       
       #reorder gene_info so genes will be in ascending order of gene start
-      first_gene = self.gene_info.loc[genes_to_inv[0]["TUindex"], 'TUindex']
-      last_gene = self.gene_info.loc[genes_to_inv[-1]["TUindex"], 'TUindex']
-      print([first_gene, last_gene])
-      self.gene_info = pd.concat([self.gene_info.iloc[0:first_gene],self.gene_info.iloc[last_gene:first_gene-1:-1],self.gene_info[last_gene+1:]])
-      self.gene_info["TUindex"] = list(range(len(self.gene_info["TUindex"])))
-
+      self.gene_info = genes_copy.sort_values(["TSS_pos"]).reset_index(drop=True)
+      
+      #change position of barriers
+      for barr_ind in self.get_barr_between_pos(start_inv,end_inv):
+        self.prot.at[barr_ind,"prot_pos"] = end_inv - (self.prot.iloc[barr_ind,1] - start_inv)
+      #reorder barriers
+      self.prot = self.prot.sort_values(["prot_pos"]).reset_index(drop=True)
+      
   def write_sim_files(self, path_to_sim):
     #TSS
     self.gene_info.to_csv(path_to_sim+'/TSS.dat', sep="\t", columns=['TUindex', 'TUorient', 'TSS_pos', 'TSS_strength'], index=False)
