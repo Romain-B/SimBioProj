@@ -78,5 +78,5 @@ for i  in range(100):
 
 
 
-G.write_sim_files('../sim_files/current')
+#G.write_sim_files('../sim_files/current')
 
