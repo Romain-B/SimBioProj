@@ -12,7 +12,9 @@ class Genome(object):
   def __init__(self, Size, path_init):
     self.Size = Size
     self.sec_dist = 60 # security distance of prot and genes
-    self.indel_var = 0
+    self.indel_var = 0 # variance of indel sizes
+    self.p_inv = .1 # p_inser = (1-p_inv)/2 = p_del
+    self.generation = 0 # generation counter
 
     TSS = pd.read_table(path_init+'/TSS.dat', header=0)
     TTS = pd.read_table(path_init+'/TTS.dat', header=0)
@@ -251,6 +253,37 @@ class Genome(object):
 
     with open(path_to_sim+'/tousgenesidentiques.gff', 'w') as f:
       f.writelines(gff)
+
+
+  def run_generation(self, path_to_sim):
+    # EXACTLY ONE event per generation, determined by prob p_inv.
+    
+    #keep old info in case mutation is BAAAAAD.
+    old_gene_info = self.gene_info.copy()
+    old_prot = self.prot.copy()
+
+    #choose event
+    event = np.random.choice(['inv', 'ins', 'del'], p=[self.p_inv, (1-self.p_inv)/2, (1-self.p_inv)/2])
+
+    
+    if 'inv' == event:
+      self.inversion()
+      print("Did an inversion.")
+    elif 'ins' == event :
+      self.insertion()
+      print("Did an insertion.")
+    elif 'del' == event:
+      self.deletion()
+      print("Did a deletion.")
+
+    self.write_sim_files(path_to_sim)
+    #update gen counter
+    self.generation += 1
+    print("Now at generation", self.generation)
+
+
+
+
 
 
 
