@@ -212,9 +212,7 @@ class Genome(object):
     """inversion between two good positions given by get_inv_pos"""
     
     start_inv,end_inv = self.get_inv_pos()
-    print(start_inv,end_inv)
     genes_to_inv = self.find_genes(start_inv,end_inv)
-    print(genes_to_inv)
     genes_copy = self.gene_info.copy()
     if len(genes_to_inv) :
       for ind in genes_to_inv:
