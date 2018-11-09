@@ -45,38 +45,39 @@ G = Genome(30000, '../sim_files/init')
 # print(G.frag_length())
 # print(G.frag_length())
 # print(G.frag_length())
-print("######################################\n")
-print("INSERTION\n")
+# print("######################################\n")
+# print("INSERTION\n")
 
-G.insertion()
-# print(G)
+# G.insertion()
+# # print(G)
 
-print("######################################\n")
-print("INSERTION\n")
+# print("######################################\n")
+# print("INSERTION\n")
 
-G.insertion()
-# print(G)
+# G.insertion()
+# # print(G)
 
-print("######################################\n")
-print("DELETION\n")
-
-
-G.deletion()
-# print(G)
-
-print("######################################\n")
-print("DELETION\n")
-
-G.deletion()
-G.deletion()
-# print(G)
+# print("######################################\n")
+# print("DELETION\n")
 
 
-for i  in range(20):
-  G.inversion()
-  print(G)
+# G.deletion()
+# # print(G)
+
+# print("######################################\n")
+# print("DELETION\n")
+
+# G.deletion()
+# G.deletion()
+# # print(G)
+
+
+# for i  in range(20):
+#   G.inversion()
+#   print(G)
 
 
 
-G.write_sim_files('../sim_files/current')
+# G.write_sim_files('../sim_files/current')
 
+[G.run_generation('../sim_files/current') for i in range(20)]
