@@ -254,6 +254,17 @@ class Genome(object):
 
 
 
+  def fitness(self,path_to_sim):
+    """returns fitness of individual"""
+    
+    #takes expression profile stored after simulation at path_to_sim
+    future = pd.read_table(path_to_sim).iloc[:,1]
+    ideal = self.env.iloc[:,1]
+    
+    fit = np.exp(-sum((future-ideal)/ideal))
+    
+    return fit
+
 
 
 

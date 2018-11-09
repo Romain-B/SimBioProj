@@ -45,38 +45,38 @@ G = Genome(30000, '../sim_files/init')
 # print(G.frag_length())
 # print(G.frag_length())
 # print(G.frag_length())
-print("######################################\n")
-print("INSERTION\n")
+#print("######################################\n")
+#print("INSERTION\n")
+#
+#G.insertion()
+## print(G)
+#
+#print("######################################\n")
+#print("INSERTION\n")
+#
+#G.insertion()
+## print(G)
+#
+#print("######################################\n")
+#print("DELETION\n")
+#
+#
+#G.deletion()
+## print(G)
+#
+#print("######################################\n")
+#print("DELETION\n")
+#
+#G.deletion()
+#G.deletion()
+## print(G)
+#
+#
+#for i  in range(20):
+#  G.inversion()
+#  print(G)
 
-G.insertion()
-# print(G)
-
-print("######################################\n")
-print("INSERTION\n")
-
-G.insertion()
-# print(G)
-
-print("######################################\n")
-print("DELETION\n")
-
-
-G.deletion()
-# print(G)
-
-print("######################################\n")
-print("DELETION\n")
-
-G.deletion()
-G.deletion()
-# print(G)
-
-
-for i  in range(20):
-  G.inversion()
-  print(G)
-
-
+print(G.fitness('../sim_files/future/itsallaboutbalance.dat'))
 
 G.write_sim_files('../sim_files/current')
 
