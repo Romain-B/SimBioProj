@@ -72,11 +72,11 @@ G.deletion()
 # print(G)
 
 
-for i  in range(100):
+for i  in range(20):
   G.inversion()
   print(G)
 
 
 
-#G.write_sim_files('../sim_files/current')
+G.write_sim_files('../sim_files/current')
 
