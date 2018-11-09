@@ -45,6 +45,7 @@ G = Genome(30000, '../sim_files/init')
 # print(G.frag_length())
 # print(G.frag_length())
 # print(G.frag_length())
+<<<<<<< HEAD
 #print("######################################\n")
 #print("INSERTION\n")
 #
@@ -76,7 +77,7 @@ G = Genome(30000, '../sim_files/init')
 #  G.inversion()
 #  print(G)
 
-print(G.fitness('../sim_files/future/itsallaboutbalance.dat'))
+#print(G.fitness('../sim_files/future/itsallaboutbalance.dat'))
 
-G.write_sim_files('../sim_files/current')
 
+[G.run_generation('../sim_files/current') for i in range(20)]
