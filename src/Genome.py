@@ -293,9 +293,8 @@ class Genome(object):
     print("Now at generation", self.generation)
 
     # run simulation
-
-    # compute fitness
-    self.fitness(path_to_sim)
+    sim.start_transcribing('../sim_files/current/params.ini', "../sim_files/future")
+    self.fitness("../sim_files/future/save_tr_nbr.csv")
 
 
     # keep or not
