@@ -32,7 +32,7 @@ class Genome(object):
     self.write_sim_files("../sim_files/current")
     ## Run simulation
     sim.start_transcribing(self.path_init+'/params.ini', "../sim_files/future")
-    #self.fitness("../sim_files/future/")
+    self.fitness("../sim_files/future/save_tr_nbr.csv")
 
 
   def __str__(self):
@@ -317,9 +317,12 @@ class Genome(object):
     """returns fitness of individual"""
     
     #takes expression profile stored after simulation at path_to_sim
-    future = pd.read_table(path_to_sim).iloc[:,1]
+    future = pd.read_table(path_to_sim, header=None).iloc[:,0]
+    future = pd.concat([future, self.gene_info['TUindex']], axis=1)
+    future.sort_values(by=['TUindex'])
+    future = future.iloc[:,0]
     ideal = self.env.iloc[:,1]
-    
+
     self.fit_bygeneration.append(np.exp(-sum((future-ideal)/ideal)))
     
 
