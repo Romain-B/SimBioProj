@@ -3,6 +3,7 @@
 
 import pandas as pd
 import numpy as np
+import simulation as sim
 import os
 
 
@@ -22,9 +23,17 @@ class Genome(object):
     self.prot = pd.read_table(path_init+'/prot.dat', header=0)
     self.env = pd.read_table(path_init+'/environment.dat')
     self.path_init = path_init
+    #self.path_to_simulator = path_to_simulator
 
     self.fit_bygeneration = []
     self.T0 = 0.1 # linked to fitness decrease prob. 
+
+    # running for time 0
+    self.write_sim_files("../sim_files/current")
+    ## Run simulation
+    sim.start_transcribing(self.path_init+'/params.ini', "../sim_files/future")
+    #self.fitness("../sim_files/future/")
+
 
   def __str__(self):
     s = "Genome Info :\n--------------\n"
