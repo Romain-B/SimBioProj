@@ -23,6 +23,9 @@ class Genome(object):
     self.env = pd.read_table(path_init+'/environment.dat')
     self.path_init = path_init
 
+    self.fit_bygeneration = []
+    self.T0 = 0.1 # linked to fitness decrease prob. 
+
   def __str__(self):
     s = "Genome Info :\n--------------\n"
     s += "Size : "+str(self.Size)+"\n"
@@ -263,7 +266,7 @@ class Genome(object):
     #choose event
     event = np.random.choice(['inv', 'ins', 'del'], p=[self.p_inv, (1-self.p_inv)/2, (1-self.p_inv)/2])
 
-    
+    #do event
     if 'inv' == event:
       self.inversion()
       print("Did an inversion.")
@@ -275,9 +278,25 @@ class Genome(object):
       print("Did a deletion.")
 
     self.write_sim_files(path_to_sim)
-    #update gen counter
+    
+    # update gen counter
     self.generation += 1
     print("Now at generation", self.generation)
+
+    # run simulation
+
+    # compute fitness
+    self.fitness(path_to_sim)
+
+
+    # keep or not
+    # if new fitness is inferior to old fit. 
+    if self.fit_bygeneration[self.generation] < self.fit_bygeneration[self.generation-1]:
+      p = np.random.exponential(self.T0)
+      # with proba p, keep it. So if rd>p, reset
+      if np.random.random() > p :
+        self.gene_info = old_gene_info
+        self.prot = old_prot
 
 
 
@@ -292,9 +311,9 @@ class Genome(object):
     future = pd.read_table(path_to_sim).iloc[:,1]
     ideal = self.env.iloc[:,1]
     
-    fit = np.exp(-sum((future-ideal)/ideal))
+    self.fit_bygeneration.append(np.exp(-sum((future-ideal)/ideal)))
     
-    return fit
+
 
 
 
