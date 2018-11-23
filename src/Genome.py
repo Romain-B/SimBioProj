@@ -1,9 +1,13 @@
 #/usr/bin/env python
 #coding:utf-8
 
+import matplotlib
+matplotlib.use("TkAgg")
+import matplotlib.pyplot as plt
+
 import pandas as pd
 import numpy as np
-import simulation as sim
+import simulation2 as sim
 import os
 
 
@@ -21,7 +25,7 @@ class Genome(object):
     TTS = pd.read_table(path_init+'/TTS.dat', header=0)
     self.gene_info = TSS.merge(TTS)
     self.prot = pd.read_table(path_init+'/prot.dat', header=0)
-    self.env = pd.read_table(path_init+'/environment.dat')
+    self.env = pd.read_table(path_init+'/environment.dat', header=None)
     self.path_init = path_init
     #self.path_to_simulator = path_to_simulator
 
@@ -31,8 +35,8 @@ class Genome(object):
     # running for time 0
     self.write_sim_files("../sim_files/current")
     ## Run simulation
-    sim.start_transcribing(self.path_init+'/params.ini', "../sim_files/future")
-    self.fitness("../sim_files/future/save_tr_nbr.csv")
+    sim.start_transcribing('../sim_files/current/params.ini', "../sim_files/future")
+    self.fit_bygeneration.append(self.fitness("../sim_files/future/save_tr_nbr.csv"))
 
 
   def __str__(self):
@@ -268,6 +272,8 @@ class Genome(object):
   def run_generation(self, path_to_sim):
     # EXACTLY ONE event per generation, determined by prob p_inv.
     
+    print("\n\n----\n")
+
     #keep old info in case mutation is BAAAAAD.
     old_gene_info = self.gene_info.copy()
     old_prot = self.prot.copy()
@@ -294,17 +300,29 @@ class Genome(object):
 
     # run simulation
     sim.start_transcribing('../sim_files/current/params.ini', "../sim_files/future")
-    self.fitness("../sim_files/future/save_tr_nbr.csv")
+    fit = self.fitness("../sim_files/future/save_tr_nbr.csv")
+    print("FITNESS :")
+    print(fit)
 
 
     # keep or not
     # if new fitness is inferior to old fit. 
-    if self.fit_bygeneration[self.generation] < self.fit_bygeneration[self.generation-1]:
+    self.fit_bygeneration.append(fit)
+
+    if fit < self.fit_bygeneration[self.generation-1]:
       p = np.random.exponential(self.T0)
       # with proba p, keep it. So if rd>p, reset
       if np.random.random() > p :
         self.gene_info = old_gene_info
         self.prot = old_prot
+        self.fit_bygeneration[self.generation] = self.fit_bygeneration[self.generation-1]
+      
+ 
+
+    # plot fitness
+    print(range(self.generation), self.fit_bygeneration)
+    plt.plot(range(self.generation), self.fit_bygeneration, lw=2)
+    plt.show()
 
 
 
@@ -312,17 +330,19 @@ class Genome(object):
 
 
 
-  def fitness(self,path_to_sim):
+  def fitness(self, path_to_sim):
     """returns fitness of individual"""
     
     #takes expression profile stored after simulation at path_to_sim
     future = pd.read_table(path_to_sim, header=None).iloc[:,0]
     future = pd.concat([future, self.gene_info['TUindex']], axis=1)
     future.sort_values(by=['TUindex'])
-    future = future.iloc[:,0]
+    future = 1.0*future.iloc[:,0]
     ideal = self.env.iloc[:,1]
+    future = future/sum(future)
+    fit = np.exp(-sum((future-ideal)/ideal))
 
-    self.fit_bygeneration.append(np.exp(-sum((future-ideal)/ideal)))
+    return fit
     
 
 
