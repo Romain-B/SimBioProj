@@ -4,6 +4,7 @@
 import numpy as np
 import pandas as pd
 from Genome import Genome
+import matplotlib.pyplot as plt
 
 if False:
   path = '../sim_files/init/TSS.dat'
@@ -79,4 +80,5 @@ G = Genome(30000, '../sim_files/init')
 #print(G.fitness('../sim_files/future/itsallaboutbalance.dat'))
 
 
-[G.run_generation('../sim_files/current') for i in range(10)]
+[G.run_generation('../sim_files/current') for i in range(20)]
+plt.show(block=True)

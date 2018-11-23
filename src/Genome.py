@@ -20,6 +20,7 @@ class Genome(object):
     self.indel_var = 0 # variance of indel sizes
     self.p_inv = .1 # p_inser = (1-p_inv)/2 = p_del
     self.generation = 0 # generation counter
+    self.evs = [None] # events occurred by generation
 
     TSS = pd.read_table(path_init+'/TSS.dat', header=0)
     TTS = pd.read_table(path_init+'/TTS.dat', header=0)
@@ -291,6 +292,7 @@ class Genome(object):
     elif 'del' == event:
       self.deletion()
       print("Did a deletion.")
+    self.evs.append(event)
 
     self.write_sim_files(path_to_sim)
     
@@ -320,9 +322,22 @@ class Genome(object):
  
 
     # plot fitness
-    print(range(self.generation), self.fit_bygeneration)
-    plt.plot(range(self.generation), self.fit_bygeneration, lw=2)
-    plt.show()
+    #print(list(range(self.generation+1)), self.fit_bygeneration)
+
+    gens = list(range(self.generation+1))
+    p1, = plt.plot(gens, self.fit_bygeneration, lw=1, c='k')
+    cols = ['r', 'g','b']
+    mks = ['x', 's', 'D']
+    p2 = [None]*3
+    for c, e in enumerate(['del', 'ins', 'inv']):
+      if e in self.evs:
+        idx = [i for i, j in enumerate(self.evs) if j == e]
+        g = [gens[i] for i in idx]
+        f = [self.fit_bygeneration[i] for i in idx]
+        p2[c] = plt.scatter(g, f, marker=mks[c], c=cols[c], s=15)
+    plt.legend([p1,p2[0], p2[1], p2[2]],['fitness', 'del', 'ins', 'inv'], loc=2)
+
+    plt.pause(0.001)
 
 
 
