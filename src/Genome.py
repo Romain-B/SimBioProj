@@ -270,7 +270,7 @@ class Genome(object):
       f.writelines(gff)
 
 
-  def run_generation(self, path_to_sim):
+  def run_generation(self, path_to_sim, plot_it=True):
     # EXACTLY ONE event per generation, determined by prob p_inv.
     
     print("\n\n----\n")
@@ -303,9 +303,6 @@ class Genome(object):
     # run simulation
     sim.start_transcribing('../sim_files/current/params.ini', "../sim_files/future")
     fit = self.fitness("../sim_files/future/save_tr_nbr.csv")
-    print("FITNESS :")
-    print(fit)
-
 
     # keep or not
     # if new fitness is inferior to old fit. 
@@ -324,6 +321,13 @@ class Genome(object):
     # plot fitness
     #print(list(range(self.generation+1)), self.fit_bygeneration)
 
+    if plot_it :
+      self.plot_sim()
+      plt.pause(0.001)
+
+
+  def plot_sim(self):
+
     gens = list(range(self.generation+1))
     p1, = plt.plot(gens, self.fit_bygeneration, lw=1, c='k')
     cols = ['r', 'g','b']
@@ -336,12 +340,6 @@ class Genome(object):
         f = [self.fit_bygeneration[i] for i in idx]
         p2[c] = plt.scatter(g, f, marker=mks[c], c=cols[c], s=15)
     plt.legend([p1,p2[0], p2[1], p2[2]],['fitness', 'del', 'ins', 'inv'], loc=2)
-
-    plt.pause(0.001)
-
-
-
-
 
 
 
