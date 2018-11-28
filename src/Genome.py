@@ -325,6 +325,39 @@ class Genome(object):
       self.plot_sim()
       plt.pause(0.001)
 
+  
+  def run_generation_no_events(self, path_to_sim, plot_it=True):
+    # To check variability of fitness for the same genome
+    # EXACTLY ONE event per generation, determined by prob p_inv.
+    
+    print("\n\n----\n")
+
+    #keep old info in case mutation is BAAAAAD.
+    old_gene_info = self.gene_info.copy()
+    old_prot = self.prot.copy()
+    self.evs.append('no')
+
+    self.write_sim_files(path_to_sim)
+    
+    # update gen counter
+    self.generation += 1
+    print("Now at generation", self.generation)
+
+    # run simulation
+    sim.start_transcribing('../sim_files/current/params.ini', "../sim_files/future")
+    fit = self.fitness("../sim_files/future/save_tr_nbr.csv")
+
+    # keep or not
+    # if new fitness is inferior to old fit. 
+    self.fit_bygeneration.append(fit) 
+
+    # plot fitness
+    #print(list(range(self.generation+1)), self.fit_bygeneration)
+
+    if plot_it :
+      self.plot_sim()
+      plt.pause(0.001)
+
 
   def plot_sim(self):
 
