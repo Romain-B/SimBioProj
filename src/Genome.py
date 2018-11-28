@@ -36,9 +36,11 @@ class Genome(object):
     # running for time 0
     self.write_sim_files("../sim_files/current")
     ## Run simulation
-    sim.start_transcribing('../sim_files/current/params.ini', "../sim_files/future")
-    self.fit_bygeneration.append(self.fitness("../sim_files/future/save_tr_nbr.csv"))
-
+    sim.start_transcribing('../sim_files/init/params.ini', "../sim_files/future")
+    fit_init = self.fitness("../sim_files/future/save_tr_nbr.csv")
+    self.fit_bygeneration.append(fit_init)
+    self.best = [self.gene_info, self.prot]
+    self.best_fit = fit_init
 
   def __str__(self):
     s = "Genome Info :\n--------------\n"
@@ -315,8 +317,11 @@ class Genome(object):
         self.gene_info = old_gene_info
         self.prot = old_prot
         self.fit_bygeneration[self.generation] = self.fit_bygeneration[self.generation-1]
-      
- 
+    # update best fitness  
+    elif fit > self.best_fit :
+      self.best = [self.gene_info, self.prot]
+      self.best_fit = fit
+
 
     # plot fitness
     #print(list(range(self.generation+1)), self.fit_bygeneration)
@@ -350,7 +355,7 @@ class Genome(object):
     # keep or not
     # if new fitness is inferior to old fit. 
     self.fit_bygeneration.append(fit) 
-
+    
     # plot fitness
     #print(list(range(self.generation+1)), self.fit_bygeneration)
 
@@ -390,25 +395,3 @@ class Genome(object):
 
     return fit
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-# class Gene:
-#     """docstring for Genome"""
-
-#     def __init__(self, s,e,ori,prom_str):
-#         self.s = s
-#         self.e = e
-#         self.ori = ori
-#         self.prom_str = prom_str
