@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 
 G = Genome(30000, '../sim_files/init')
 
-[G.run_generation_no_events('../sim_files/current') for i in range(50)]
-[G.run_generation('../sim_files/current') for i in range(500)]
+[G.run_generation_no_events('../sim_files/current') for i in range(5)]
+[G.run_generation('../sim_files/current') for i in range(5)]
 
 
 
@@ -23,11 +23,13 @@ with open("../sim_files/current/best_genome.txt", "w") as output:
   for el in l:
     output.write(el)
 
+
 # to keep information about how fitness evolve with events
 with open("../sim_files/current/fitness_by_event.txt", "w") as output:
-  output.write(str(G.evs))
+  output.write(" ".join(map(str,G.evs)))
   output.write("\n")
-  output.write(str(G.fit_bygeneration))
+  output.write(" ".join(map(str,G.fit_bygeneration)))
+  output.write("\n")
   
 #just to have a first idea about how fitness evolves with each event
 diff_fit = np.array(G.fit_bygeneration[:-1]) - np.array(G.fit_bygeneration[1:])
