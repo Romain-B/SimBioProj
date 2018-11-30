@@ -10,12 +10,13 @@ import numpy as np
 import simulation2 as sim
 import os
 import subprocess
+import csv
 
 
 class Genome(object):
   """class containing genome of target individual"""
 
-  def __init__(self, Size, path_init):
+  def __init__(self, Size, path_init, path_output="../sim_files/gene_expr.csv"):
     self.Size = Size
     self.sec_dist = 60 # security distance of prot and genes
     self.indel_var = 0 # variance of indel sizes
@@ -29,6 +30,7 @@ class Genome(object):
     self.prot = pd.read_table(path_init+'/prot.dat', header=0)
     self.env = pd.read_table(path_init+'/environment.dat', header=None)
     self.path_init = path_init
+    self.path_output = path_output
     #self.path_to_simulator = path_to_simulator
 
     self.fit_bygeneration = []
@@ -39,7 +41,20 @@ class Genome(object):
     self.write_sim_files("../sim_files/current")
     ## Run simulation
     sim.start_transcribing('../sim_files/current/params.ini', "../sim_files/future")
-    self.fit_bygeneration.append(self.fitness("../sim_files/future/save_tr_nbr.csv"))
+
+    fit, fut = self.fitness("../sim_files/future/save_tr_nbr.csv")
+    self.fit_bygeneration.append(fit)
+
+    try:
+      os.remove(self.path_output)
+    except OSError:
+      pass
+
+    print(subprocess.check_output(['touch',self.path_output]))
+
+    self.gene_expr_history("fit", ["g0","g1","g2", "g3", "g4","g5", "g6", "g7", "g8", "g9"], "event", "keep", g="gen")
+    self.gene_expr_history(fit, fut, "NoE", "NA")
+
 
 
   def __str__(self):
@@ -304,11 +319,12 @@ class Genome(object):
 
     # run simulation
     sim.start_transcribing('../sim_files/current/params.ini', "../sim_files/future")
-    fit = self.fitness("../sim_files/future/save_tr_nbr.csv")
+    fit, fut = self.fitness("../sim_files/future/save_tr_nbr.csv")
 
     # keep or not
     # if new fitness is inferior to old fit. 
     self.fit_bygeneration.append(fit)
+    keep = True
 
     if fit < self.fit_bygeneration[self.generation-1]:
       p = np.random.exponential(self.T0)
@@ -317,15 +333,27 @@ class Genome(object):
         self.gene_info = old_gene_info
         self.prot = old_prot
         self.fit_bygeneration[self.generation] = self.fit_bygeneration[self.generation-1]
+        keep = False
       
- 
+    self.gene_expr_history(fit, fut, event, keep)
 
     # plot fitness
-    #print(list(range(self.generation+1)), self.fit_bygeneration)
+    # print(list(range(self.generation+1)), self.fit_bygeneration)
 
     if plot_it :
       self.plot_sim()
       plt.pause(0.001)
+
+  def gene_expr_history(self, fit, fut, ev, keep, g=None):
+    
+    g = self.generation if g is None else g
+    line = [g]+[ev]+[fit]+[keep]+list(fut)
+    print(line)
+
+    with open(self.path_output, "a") as fp:
+      wr = csv.writer(fp, dialect='excel')
+      wr.writerow(line)
+
 
   
   def run_generation_no_events(self, path_to_sim, plot_it=True):
@@ -347,11 +375,12 @@ class Genome(object):
 
     # run simulation
     sim.start_transcribing('../sim_files/current/params.ini', "../sim_files/future")
-    fit = self.fitness("../sim_files/future/save_tr_nbr.csv")
+    fit, fut = self.fitness("../sim_files/future/save_tr_nbr.csv")
 
     # keep or not
     # if new fitness is inferior to old fit. 
     self.fit_bygeneration.append(fit) 
+    self.gene_expr_history(fit, fut, 'NoE', 'NA')
 
     # plot fitness
     #print(list(range(self.generation+1)), self.fit_bygeneration)
@@ -390,7 +419,7 @@ class Genome(object):
     future = future/sum(future)
     fit = np.exp(-sum((future-ideal)/ideal))
 
-    return fit
+    return fit, future
     
 
 
