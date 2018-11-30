@@ -34,7 +34,7 @@ class Genome(object):
     #self.path_to_simulator = path_to_simulator
 
     self.fit_bygeneration = []
-    self.T0 = 0.001 # linked to fitness decrease prob. 
+    self.T0 = 0.0005 # linked to fitness decrease prob. 
 
     print(subprocess.check_output(['cp', path_init+'/params.ini', '../sim_files/current/params.ini']))
     # running for time 0
@@ -419,7 +419,8 @@ class Genome(object):
     future = 1.0*future.iloc[:,0]
     ideal = self.env.iloc[:,1]
     future = future/sum(future)
-    fit = np.exp(-sum((future-ideal)/ideal))
+    #fit = np.exp(-sum((future-ideal)/ideal))
+    fit = np.exp(-sum(np.log(future/ideal)))
 
     return fit, future
     
