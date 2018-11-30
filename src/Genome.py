@@ -11,6 +11,7 @@ import simulation2 as sim
 import os
 import subprocess
 import csv
+from draw_genome import plot_genome 
 
 
 class Genome(object):
@@ -59,8 +60,7 @@ class Genome(object):
     self.best = [self.gene_info, self.prot]
     self.best_fit = fit
 
-    self.write_gb_file(generation='test')
-
+    self.plot_current_genome()
 
 
   def __str__(self):
@@ -293,7 +293,7 @@ class Genome(object):
       f.writelines(gff)
 
 
-  def run_generation(self, path_to_sim, plot_it=True):
+  def run_generation(self, path_to_sim, plot_it=True, plot_gen=10):
     # EXACTLY ONE event per generation, determined by prob p_inv.
     
     print("\n\n----\n")
@@ -356,6 +356,9 @@ class Genome(object):
     if plot_it :
       self.plot_sim()
       plt.pause(0.001)
+
+    if (self.generation % plot_gen) == 0:
+      self.plot_current_genome()
 
   
   def run_generation_no_events(self, path_to_sim, plot_it=True):
@@ -437,8 +440,8 @@ class Genome(object):
     return fit, future
 
 
-  def write_gb_file(self, generation='', title="genome_plot_gen_"):
-    path = "../plotting/"+title+generation+'.gb'
+  def write_gb_file(self, path):
+    
 
     s5 = '     ' # before feature name
     s7 = '       '
@@ -462,6 +465,11 @@ class Genome(object):
     gbString += "\nORIGIN\n//"
     with open(path, 'w') as f:
       f.write(gbString)
+
+  def plot_current_genome(self, title="genome_plot"):
+    path = "../plotting/"+title+"_gen_"+str(self.generation)+'.gb'
+    self.write_gb_file(path)
+    plot_genome(path)
 
 
     
