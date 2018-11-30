@@ -57,7 +57,7 @@ class Genome(object):
 
     # soso's best genome thingy
     self.best = [self.gene_info, self.prot]
-    self.best_fit = fit_init
+    self.best_fit = fit
 
 
 
