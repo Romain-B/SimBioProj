@@ -34,7 +34,7 @@ class Genome(object):
     #self.path_to_simulator = path_to_simulator
 
     self.fit_bygeneration = []
-    self.T0 = 0.1 # linked to fitness decrease prob. 
+    self.T0 = 0.001 # linked to fitness decrease prob. 
 
     print(subprocess.check_output(['cp', path_init+'/params.ini', '../sim_files/current/params.ini']))
     # running for time 0
@@ -326,8 +326,10 @@ class Genome(object):
     self.fit_bygeneration.append(fit)
     keep = True
 
-    if fit < self.fit_bygeneration[self.generation-1]:
-      p = np.random.exponential(self.T0)
+    deltaU = self.fit_bygeneration[self.generation-1] - fit
+
+    if deltaU > 0:
+      p = np.exp(-deltaU/self.T0)
       # with proba p, keep it. So if rd>p, reset
       if np.random.random() > p :
         self.gene_info = old_gene_info
@@ -343,17 +345,6 @@ class Genome(object):
     if plot_it :
       self.plot_sim()
       plt.pause(0.001)
-
-  def gene_expr_history(self, fit, fut, ev, keep, g=None):
-    
-    g = self.generation if g is None else g
-    line = [g]+[ev]+[fit]+[keep]+list(fut)
-    print(line)
-
-    with open(self.path_output, "a") as fp:
-      wr = csv.writer(fp, dialect='excel')
-      wr.writerow(line)
-
 
   
   def run_generation_no_events(self, path_to_sim, plot_it=True):
@@ -388,6 +379,17 @@ class Genome(object):
     if plot_it :
       self.plot_sim()
       plt.pause(0.001)
+
+
+  def gene_expr_history(self, fit, fut, ev, keep, g=None):
+    
+    g = self.generation if g is None else g
+    line = [g]+[ev]+[fit]+[keep]+list(fut)
+
+    with open(self.path_output, "a") as fp:
+      wr = csv.writer(fp, dialect='excel')
+      wr.writerow(line)
+
 
 
   def plot_sim(self):
