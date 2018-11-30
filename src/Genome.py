@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import simulation2 as sim
 import os
+import subprocess
 
 
 class Genome(object):
@@ -33,6 +34,7 @@ class Genome(object):
     self.fit_bygeneration = []
     self.T0 = 0.1 # linked to fitness decrease prob. 
 
+    print(subprocess.check_output(['cp', path_init+'/params.ini', '../sim_files/current/params.ini']))
     # running for time 0
     self.write_sim_files("../sim_files/current")
     ## Run simulation
