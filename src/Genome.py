@@ -59,6 +59,8 @@ class Genome(object):
     self.best = [self.gene_info, self.prot]
     self.best_fit = fit
 
+    self.write_gb_file(generation='test')
+
 
 
   def __str__(self):
@@ -433,4 +435,33 @@ class Genome(object):
     fit = np.exp(-sum(np.log(future/ideal)))
 
     return fit, future
+
+
+  def write_gb_file(self, generation='', title="genome_plot_gen_"):
+    path = "../plotting/"+title+generation+'.gb'
+
+    s5 = '     ' # before feature name
+    s7 = '       '
+    s9 = '         ' # after barrier
+    s12 = '            ' # after gene
+    gbString = "LOCUS"+s7+"TOUSGENESIDENTIQUES"+s7+str(self.Size)+" bp    DNA"+s5+"PLN"+s5+"DEC-2018"
+    gbString += "\n\nFEATURES"+s12+" Location/Qualifiers"
+
+    for i, row in self.gene_info.iterrows():
+      gbString += "\n"+s5+"gene"+s12
+      if row['TUorient'] == '+':
+        gbString += str(row['TSS_pos'])+'..'+str(row['TTS_pos'])
+      else :
+        gbString += "complement("+str(row['TTS_pos'])+'..'+str(row['TSS_pos'])+")"
+
+      gbString += "\n"+s5+s12+"    /gene=\"g"+str(row['TUindex'])+"\""
+
+    for i, row in self.prot.iterrows():
+      gbString += "\n"+s5+"barrier"+s9+str(row['prot_pos'])+'..'+str(row['prot_pos']+20)
+
+    gbString += "\nORIGIN\n//"
+    with open(path, 'w') as f:
+      f.write(gbString)
+
+
     
