@@ -10,9 +10,12 @@ import matplotlib.pyplot as plt
 G = Genome(30000, '../sim_files/init')
 
 
-best_genome = True
+best_genome = False
 
 if best_genome :
+  [G.run_generation_no_events('../sim_files/current') for i in range(5)]
+  [G.run_generation('../sim_files/current') for i in range(5)]
+
   # to see how look like the best genome we made
   l =['Best genome found\n\n', str(G.best[0]), 
       '\n\nBarriers positions\n\n', str(G.best[1]), 
@@ -38,13 +41,18 @@ if best_genome :
   plt.show(block=True)
 
 
+
+
+
+
+
+
 else :
-  [G.run_generation_no_events('../sim_files/current') for i in range(10)]
-  [G.run_generation('../sim_files/current') for i in range(100)]
+  [G.run_generation_no_events('../sim_files/current') for i in range(50)]
+  [G.run_generation('../sim_files/current') for i in range(1000)]
+  plt.savefig('../sim_files/fitness_by_gen.png')
   plt.show(block=True)
 
 
 
-  [G.run_generation_no_events('../sim_files/current') for i in range(5)]
-  [G.run_generation('../sim_files/current') for i in range(5)]
 
