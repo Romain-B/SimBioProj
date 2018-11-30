@@ -1,0 +1,35 @@
+LOCUS       TOUSGENESIDENTIQUES       30000 bp    DNA     PLN     DEC-2018
+
+FEATURES             Location/Qualifiers
+     gene            1001..2000
+                     /gene="g0"
+     gene            4001..5000
+                     /gene="g1"
+     gene            7001..8000
+                     /gene="g2"
+     gene            10001..11000
+                     /gene="g3"
+     gene            13001..14000
+                     /gene="g4"
+     gene            16001..17000
+                     /gene="g5"
+     gene            19001..20000
+                     /gene="g6"
+     gene            22001..23000
+                     /gene="g7"
+     gene            25001..26000
+                     /gene="g8"
+     gene            28001..29000
+                     /gene="g9"
+     barrier         1..21
+     barrier         3001..3021
+     barrier         6001..6021
+     barrier         9001..9021
+     barrier         12001..12021
+     barrier         15001..15021
+     barrier         18001..18021
+     barrier         21001..21021
+     barrier         24001..24021
+     barrier         27001..27021
+ORIGIN
+//

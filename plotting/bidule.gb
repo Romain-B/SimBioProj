@@ -1,0 +1,8 @@
+LOCUS       TOUSGENESIDENTIQUES     30000 bp    DNA     PLN     JUN-1999
+
+FEATURES             Location/Qualifiers
+     gene            1141..2140
+                     /gene="g0"
+     barrier         1..20 
+ORIGIN
+//
