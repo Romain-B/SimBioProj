@@ -1013,11 +1013,13 @@ def start_transcribing(INI_file, first_output_path=None, resume_output_path=None
 
 
     save_files(output_path, Barr_pos, Barr_type, Dom_size, Barr_ts_remain, Barr_sigma, tr_nbr, tr_times, save_RNAPs_info, save_tr_info, save_Dom_sigma, save_Barr_pos, save_mean_sig_wholeGenome, save_Dom_size, DELTA_X, RNAPs_genSC, RNAPs_tr, RNAPs_pos, RNAPs_unhooked_id, RNAPs_hooked_id, RNAPs_strand, ts_beg, ts_remain, save_nbr_RNAPs_hooked, init_rate, Kon, RNAPS_NB, SIGMA_0, GYRASE_CONC, TOPO_CONC)
-
+    
+    """
     print("Simulation completed successfully !! \nNumber of transcripts : \n")
     for i, v in enumerate(tr_nbr):
         print("Transcript{} : {}".format(i, v))
-
+    """
+    
     return (GFF_file, TSS_file, TTS_file,
             SIM_TIME, RNAPS_NB,
             tr_nbr, tr_times, init_rate,

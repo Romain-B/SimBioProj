@@ -55,6 +55,10 @@ class Genome(object):
     self.gene_expr_history("fit", ["g0","g1","g2", "g3", "g4","g5", "g6", "g7", "g8", "g9"], "event", "keep", g="gen")
     self.gene_expr_history(fit, fut, "NoE", "NA")
 
+    # soso's best genome thingy
+    self.best = [self.gene_info, self.prot]
+    self.best_fit = fit_init
+
 
 
   def __str__(self):
@@ -339,6 +343,11 @@ class Genome(object):
       
     self.gene_expr_history(fit, fut, event, keep)
 
+    # update best fitness  
+    if fit > self.best_fit :
+      self.best = [self.gene_info, self.prot]
+      self.best_fit = fit
+
     # plot fitness
     # print(list(range(self.generation+1)), self.fit_bygeneration)
 
@@ -372,6 +381,7 @@ class Genome(object):
     # if new fitness is inferior to old fit. 
     self.fit_bygeneration.append(fit) 
     self.gene_expr_history(fit, fut, 'NoE', 'NA')
+
 
     # plot fitness
     #print(list(range(self.generation+1)), self.fit_bygeneration)
@@ -424,25 +434,3 @@ class Genome(object):
 
     return fit, future
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-# class Gene:
-#     """docstring for Genome"""
-
-#     def __init__(self, s,e,ori,prom_str):
-#         self.s = s
-#         self.e = e
-#         self.ori = ori
-#         self.prom_str = prom_str
