@@ -23,11 +23,13 @@ class Genome(object):
   """class containing genome of target individual"""
 
   def __init__(self, Size, path_init, path_output="../sim_files/output", NO_PLOT=False,
-              sec_dist=60, indel_var=0, p_inv=.1, T0=0.001):
+              sec_dist=77, indel_var=0, p_inv=.1, T0=0.001, nb_pol = 7):
+							
     self.Size = Size
     self.sec_dist = sec_dist # security distance of prot and genes
     self.indel_var = indel_var # variance of indel sizes (MUST BE < sec_dist )
     self.p_inv = p_inv # p_inser = (1-p_inv)/2 = p_del
+    self.change_RNAPS(nb_pol, sec_dist) # change number of PRNA and the security distance in params.ini
     self.generation = 0 # generation counter
     self.evs = [None] # events occurred by generation
 
@@ -490,6 +492,17 @@ class Genome(object):
     path = "../plotting/"+title+"_gen_"+str(self.generation)+'.gb'
     self.write_gb_file(path)
     plot_genome(path)
+		
+  def change_RNAPS(self, nb_pol, sec_dist):
+    """it modifies the number of polymerases and the security distance in param.ini"""
+    f = open(r'../sim_files/init/params.ini', 'r')
+    lines = f.readlines()
+    lines[26] = "RNAPS_NB = "+str(nb_pol)+'\n'
+    lines[20] = "DELTA_X = "+str(sec_dist)+'\n'
+    f.close()
+    f = open(r'../sim_files/init/params.ini', 'w')
+    f.writelines(lines)
+    f.close()
 
 
     
