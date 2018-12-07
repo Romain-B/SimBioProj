@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import simulation2 as sim
 import os
+from shutil import copy2
 import subprocess
 import csv
 from draw_genome import plot_genome 
@@ -35,9 +36,10 @@ class Genome(object):
     #self.path_to_simulator = path_to_simulator
 
     self.fit_bygeneration = []
-    self.T0 = 0.0005 # linked to fitness decrease prob. 
+    self.T0 = 0.001 # linked to fitness decrease prob. 
 
-    print(subprocess.check_output(['cp', path_init+'/params.ini', '../sim_files/current/params.ini']))
+    copy2(path_init+'/params.ini','../sim_files/current/params.ini')
+#    print(subprocess.check_output(['cp', path_init+'/params.ini', '../sim_files/current/params.ini']))
     # running for time 0
     self.write_sim_files("../sim_files/current")
     ## Run simulation
@@ -51,7 +53,8 @@ class Genome(object):
     except OSError:
       pass
 
-    print(subprocess.check_output(['touch',self.path_output]))
+    open(self.path_output, 'w').close()
+    #print(subprocess.check_output(['touch',self.path_output]))
 
     self.gene_expr_history("fit", ["g0","g1","g2", "g3", "g4","g5", "g6", "g7", "g8", "g9"], "event", "keep", g="gen")
     self.gene_expr_history(fit, fut, "NoE", "NA")
@@ -60,6 +63,7 @@ class Genome(object):
     self.best = [self.gene_info, self.prot]
     self.best_fit = fit
 
+    # mega plot genome of the future
     self.plot_current_genome()
 
 
