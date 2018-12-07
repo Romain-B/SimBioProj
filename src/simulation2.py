@@ -3,7 +3,7 @@ import configparser
 import pandas as pd
 import numpy as np
 import collections as col
-from pylab import *
+#from pylab import *
 import errno
 import csv
 from shutil import copy
@@ -199,7 +199,7 @@ def get_tr_info(tss, tts, TU_tts, Kon, Poff):
                     j += 1
                 k += 1
     tr_size = np.abs(np.array(tr_start) - np.array(tr_end))
-    ts_beg_all_trs = np.zeros(len(tr_id), dtype=int64)
+    ts_beg_all_trs = np.zeros(len(tr_id), dtype=int)
     ts_remain_all = np.around(tr_size)
     return (tr_id, tr_strand, tr_start, tr_end, tr_rate, tr_size, ts_beg_all_trs, ts_remain_all)
 
@@ -263,7 +263,7 @@ def get_tr_info_1(tss, tts, TU_tts, Kon, Poff):
                     j += 1
                 k += 1
     tr_size = np.abs(np.array(tr_start) - np.array(tr_end))
-    ts_beg_all_trs = np.zeros(len(tr_id), dtype=int64)
+    ts_beg_all_trs = np.zeros(len(tr_id), dtype=int)
     ts_remain_all = np.around(tr_size)
     return (tr_id, tr_strand, tr_start, tr_end, tr_rate, tr_size, ts_beg_all_trs, ts_remain_all)
 
@@ -325,7 +325,7 @@ def get_tr_info_old(tss, tts, TU_tts, Kon, Poff):
                     j += 1
                 k += 1
     tr_size = np.abs(np.array(tr_start) - np.array(tr_end))
-    ts_beg_all_trs = np.zeros(len(tr_id), dtype=int64)
+    ts_beg_all_trs = np.zeros(len(tr_id), dtype=int)
     ts_remain_all = np.around(tr_size)
     return (tr_id, tr_strand, tr_start, tr_end, tr_rate, tr_size, ts_beg_all_trs, ts_remain_all)
 
@@ -511,7 +511,7 @@ def start_transcribing(INI_file, first_output_path=None, resume_output_path=None
     RNAPs_id = np.full(RNAPS_NB, range(0, RNAPS_NB), dtype=int)
 
     # RNAPs_last_pos
-    RNAPs_last_pos = np.full(RNAPS_NB, NaN)
+    RNAPs_last_pos = np.full(RNAPS_NB, np.nan)
 
     ## get the strands orientation
     # strands = str2num(gff_df['strand'].values)
@@ -524,26 +524,26 @@ def start_transcribing(INI_file, first_output_path=None, resume_output_path=None
     tr_strand = np.array(tr_strand)
 
     tr_start = np.array(tr_start)/DELTA_X
-    tr_start = tr_start.astype(int64)
+    tr_start = tr_start.astype(int)
 
     tr_end = np.array(tr_end)/DELTA_X
-    tr_end = tr_end.astype(int64)
+    tr_end = tr_end.astype(int)
 
     tr_rate = np.array(tr_rate)
 
     tr_size = np.array(tr_size)/DELTA_X
-    tr_size = tr_size.astype(int64)
+    tr_size = tr_size.astype(int)
 
     ts_beg_all_trs = np.array(ts_beg_all_trs)
 
     ts_remain_all = np.array(ts_remain_all)/DELTA_X
-    ts_remain_all = ts_remain_all.astype(int64)
+    ts_remain_all = ts_remain_all.astype(int)
 
     genome = int(genome_size/DELTA_X)
 
     if resume == False:
         # The position of RNAPs
-        RNAPs_pos = np.full(RNAPS_NB, NaN)
+        RNAPs_pos = np.full(RNAPS_NB, np.nan)
 
         # The number of times transcripts has been transcribed
         tr_nbr = np.zeros(len(tr_id), dtype=int)
@@ -572,7 +572,7 @@ def start_transcribing(INI_file, first_output_path=None, resume_output_path=None
             # here we need to make an Barr_ts_remain
             # to track the position of each RNAPol
             # each position in Barr_ts_remain is associated with the same position in Barr_pos
-            Barr_ts_remain = np.full(len(Barr_fix), NaN) # The Barr_ts_remain of fixed barr is NaN
+            Barr_ts_remain = np.full(len(Barr_fix), np.nan) # The Barr_ts_remain of fixed barr is np.nan
 
         # if prot_file is empty or doesn't exist then:
         except (pd.io.common.EmptyDataError, OSError, ValueError):
@@ -587,11 +587,11 @@ def start_transcribing(INI_file, first_output_path=None, resume_output_path=None
 
 
         RNAPs_unhooked_id = np.copy(RNAPs_id)
-        RNAPs_strand = np.full(RNAPS_NB, NaN)
-        ts_beg = np.full(RNAPS_NB, NaN)
-        ts_remain = np.full(RNAPS_NB, NaN)
+        RNAPs_strand = np.full(RNAPS_NB, np.nan)
+        ts_beg = np.full(RNAPS_NB, np.nan)
+        ts_remain = np.full(RNAPS_NB, np.nan)
         # RNAPs_tr will contain the id of the picked transcript
-        RNAPs_tr = np.full(RNAPS_NB, -1, dtype=(int64))
+        RNAPs_tr = np.full(RNAPS_NB, -1, dtype=(int))
         # get the TSSs ids
         tss_id = tss.index.values
 
@@ -844,11 +844,11 @@ def start_transcribing(INI_file, first_output_path=None, resume_output_path=None
         RNAPs_unhooked_id = np.where(RNAPs_tr==-1)[0]
 
         # reset the arrays
-        RNAPs_strand[RNAPs_unhooked_id] = NaN
-        RNAPs_pos[RNAPs_unhooked_id] = NaN
-        RNAPs_last_pos[RNAPs_unhooked_id] = NaN
-        ts_beg[RNAPs_unhooked_id] = NaN
-        ts_remain[RNAPs_unhooked_id] = NaN
+        RNAPs_strand[RNAPs_unhooked_id] = np.nan
+        RNAPs_pos[RNAPs_unhooked_id] = np.nan
+        RNAPs_last_pos[RNAPs_unhooked_id] = np.nan
+        ts_beg[RNAPs_unhooked_id] = np.nan
+        ts_remain[RNAPs_unhooked_id] = np.nan
 
         Barr_pos[np.where(Barr_type == -1)]-=1
         Barr_pos[np.where(Barr_type == 1)]+=1
