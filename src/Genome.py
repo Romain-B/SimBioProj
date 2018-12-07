@@ -1,9 +1,14 @@
 #/usr/bin/env python
 #coding:utf-8
 
-import matplotlib
-matplotlib.use("TkAgg")
-import matplotlib.pyplot as plt
+
+try :
+  import matplotlib
+  matplotlib.use("TkAgg")
+  import matplotlib.pyplot as plt
+  from draw_genome import plot_genome 
+except ImportError:
+  pass 
 
 import pandas as pd
 import numpy as np
@@ -12,17 +17,17 @@ import os
 from shutil import copy2
 import subprocess
 import csv
-from draw_genome import plot_genome 
 
 
 class Genome(object):
   """class containing genome of target individual"""
 
-  def __init__(self, Size, path_init, path_output="../sim_files/gene_expr.csv"):
+  def __init__(self, Size, path_init, path_output="../sim_files/output", NO_PLOT=False,
+              sec_dist=60, indel_var=0, p_inv=.1, T0=0.001):
     self.Size = Size
-    self.sec_dist = 60 # security distance of prot and genes
-    self.indel_var = 0 # variance of indel sizes
-    self.p_inv = .1 # p_inser = (1-p_inv)/2 = p_del
+    self.sec_dist = sec_dist # security distance of prot and genes
+    self.indel_var = indel_var # variance of indel sizes (MUST BE < sec_dist )
+    self.p_inv = p_inv # p_inser = (1-p_inv)/2 = p_del
     self.generation = 0 # generation counter
     self.evs = [None] # events occurred by generation
 
@@ -33,12 +38,19 @@ class Genome(object):
     self.env = pd.read_table(path_init+'/environment.dat', header=None)
     self.path_init = path_init
     self.path_output = path_output
+    self.gene_out = self.path_output+'/gene_expr.csv'
+
+    if not os.path.exists(self.path_output):
+      os.makedirs(self.path_output)
+
     #self.path_to_simulator = path_to_simulator
 
-    self.fit_bygeneration = []
-    self.T0 = 0.001 # linked to fitness decrease prob. 
+    self.NO_PLOT = NO_PLOT
 
-    copy2(path_init+'/params.ini','../sim_files/current/params.ini')
+    self.fit_bygeneration = []
+    self.T0 = T0 # linked to fitness decrease prob. 
+
+    copy2(self.path_init+'/params.ini','../sim_files/current/params.ini')
 #    print(subprocess.check_output(['cp', path_init+'/params.ini', '../sim_files/current/params.ini']))
     # running for time 0
     self.write_sim_files("../sim_files/current")
@@ -49,13 +61,14 @@ class Genome(object):
     self.fit_bygeneration.append(fit)
 
     try:
-      os.remove(self.path_output)
+      os.remove(self.gene_out)
     except OSError:
       pass
 
-    open(self.path_output, 'w').close()
-    #print(subprocess.check_output(['touch',self.path_output]))
+    open(self.gene_out, 'w').close()
 
+    ##########################""
+    # CHANGE THIS
     self.gene_expr_history("fit", ["g0","g1","g2", "g3", "g4","g5", "g6", "g7", "g8", "g9"], "event", "keep", g="gen")
     self.gene_expr_history(fit, fut, "NoE", "NA")
 
@@ -63,8 +76,9 @@ class Genome(object):
     self.best = [self.gene_info, self.prot]
     self.best_fit = fit
 
-    # mega plot genome of the future
-    self.plot_current_genome()
+    if not NO_PLOT:
+      # mega plot genome of the future
+      self.plot_current_genome()
 
 
   def __str__(self):
@@ -280,6 +294,7 @@ class Genome(object):
       #reorder barriers
       self.prot = self.prot.sort_values(["prot_pos"]).reset_index(drop=True)
       
+
   def write_sim_files(self, path_to_sim):
     #TSS
     self.gene_info.to_csv(path_to_sim+'/TSS.dat', sep="\t", columns=['TUindex', 'TUorient', 'TSS_pos', 'TSS_strength'], index=False)
@@ -295,6 +310,7 @@ class Genome(object):
 
     with open(path_to_sim+'/tousgenesidentiques.gff', 'w') as f:
       f.writelines(gff)
+
 
 
   def run_generation(self, path_to_sim, plot_it=True, plot_gen=10):
@@ -357,12 +373,13 @@ class Genome(object):
     # plot fitness
     # print(list(range(self.generation+1)), self.fit_bygeneration)
 
-    if plot_it :
-      self.plot_sim()
-      plt.pause(0.001)
+    if not self.NO_PLOT:
+      if plot_it :
+        self.plot_sim()
+        plt.pause(0.001)
 
-    if (self.generation % plot_gen) == 0:
-      self.plot_current_genome()
+      if (self.generation % plot_gen) == 0:
+        self.plot_current_genome()
 
   
   def run_generation_no_events(self, path_to_sim, plot_it=True):
@@ -371,11 +388,7 @@ class Genome(object):
     
     print("\n\n----\n")
 
-    #keep old info in case mutation is BAAAAAD.
-    old_gene_info = self.gene_info.copy()
-    old_prot = self.prot.copy()
     self.evs.append('no')
-
     self.write_sim_files(path_to_sim)
     
     # update gen counter
@@ -393,11 +406,11 @@ class Genome(object):
 
 
     # plot fitness
-    #print(list(range(self.generation+1)), self.fit_bygeneration)
+    if not self.NO_PLOT:
 
-    if plot_it :
-      self.plot_sim()
-      plt.pause(0.001)
+      if plot_it :
+        self.plot_sim()
+        plt.pause(0.001)
 
 
   def gene_expr_history(self, fit, fut, ev, keep, g=None):
@@ -405,7 +418,7 @@ class Genome(object):
     g = self.generation if g is None else g
     line = [g]+[ev]+[fit]+[keep]+list(fut)
 
-    with open(self.path_output, "a") as fp:
+    with open(self.gene_out, "a") as fp:
       wr = csv.writer(fp, dialect='excel')
       wr.writerow(line)
 
@@ -469,6 +482,9 @@ class Genome(object):
     gbString += "\nORIGIN\n//"
     with open(path, 'w') as f:
       f.write(gbString)
+
+
+
 
   def plot_current_genome(self, title="genome_plot"):
     path = "../plotting/"+title+"_gen_"+str(self.generation)+'.gb'

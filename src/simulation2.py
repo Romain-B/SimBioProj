@@ -7,7 +7,7 @@ from pylab import *
 import errno
 import csv
 from shutil import copy
-from scipy.optimize import fsolve
+#from scipy.optimize import fsolve
 
 ###########################################################
 #                       Functions                         #
