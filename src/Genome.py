@@ -181,7 +181,7 @@ class Genome(object):
     """Returns size of fragment for deletion"""
         
     var = 0 if self.indel_var==0 else np.random.randint(-self.indel_var,self.indel_var)
-    return self.sec_dist + var
+    return self.sec_dist + self.indel_var + var
 
 
   def insertion(self):
@@ -236,7 +236,7 @@ class Genome(object):
     p2 = p1 + np.random.choice([-1,1])*l
     s, e = np.sort([p1,p2]) 
 
-    while not self.good_inv_pos(s,e) and not self.barr_between_pos(s,e):
+    while not self.good_inv_pos(s,e) and not self.barr_between_pos(s,e) and (s <= 0 <= e):
       p1 = np.random.randint(0, self.Size)
       p2 = p1 + np.random.choice([-1,1])*l
       s, e = np.sort([p1,p2]) 
