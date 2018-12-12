@@ -3,6 +3,7 @@ from reportlab.lib.units import cm
 from Bio.Graphics import GenomeDiagram
 from Bio import SeqIO
 from Bio.SeqFeature import SeqFeature, FeatureLocation
+import sys
 
 
 
@@ -41,4 +42,4 @@ def plot_genome(path_to_gb):
 #gd_diagram.write("plasmid_circular_nice.svg", "SVG")
 
 if __name__ == '__main__':
-  plot_genome("../plotting/genome_plot_gen_test.gb")
+  plot_genome(sys.argv[1])
