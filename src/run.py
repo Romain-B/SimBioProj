@@ -20,7 +20,7 @@ nb_pol = [5, 9] #6
 
 #G = Genome(30000, '../sim_files/init')
 nfails = 0
-
+ 
 for i, row in plan.iterrows():
   
   
