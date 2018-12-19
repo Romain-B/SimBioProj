@@ -149,8 +149,14 @@ class Genome(object):
     # check the distance between barriers and gene
     s_gd, s_bd = self.nearest_obj_distance(s)
     e_gd, e_bd = self.nearest_obj_distance(e)
+
+    if s_gd+e_bd < self.sec_dist or s_bd+e_gd < self.sec_dist :
+      return False
+
+    if s_gd+e_gd < self.sec_dist or s_bd+e_bd < self.sec_dist :
+      return False
     
-    return True if s_gd+e_bd > self.sec_dist and s_bd+e_gd > self.sec_dist else False
+    return True
 
   def pos_in_gene(self, p):
     """Returns True if position is in a gene"""
@@ -236,7 +242,8 @@ class Genome(object):
     p2 = p1 + np.random.choice([-1,1])*l
     s, e = np.sort([p1,p2]) 
 
-    while not self.good_inv_pos(s,e) and not self.barr_between_pos(s,e) and (s <= 0 <= e):
+    while not self.good_inv_pos(s,e) or not self.barr_between_pos(s,e) or (s <= 0 <= e) or e > self.Size:
+      l = self.frag_length()
       p1 = np.random.randint(0, self.Size)
       p2 = p1 + np.random.choice([-1,1])*l
       s, e = np.sort([p1,p2]) 
