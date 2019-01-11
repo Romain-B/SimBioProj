@@ -7,8 +7,8 @@ from Genome import Genome
 import matplotlib.pyplot as plt
 
 
-G = Genome(30000, '../sim_files/init')
-
+#G = Genome(30000, '../sim_files/init', NO_PLOT=True)
+G = Genome(30000, '../sim_files/init', indel_var=500, p_inv=0.1, NO_PLOT=True)
 
 best_genome = False
 
@@ -48,9 +48,9 @@ if best_genome :
 
 
 else :
-  [G.run_generation_no_events('../sim_files/current') for i in range(50)]
-  [G.run_generation('../sim_files/current') for i in range(1000)]
-  plt.savefig('../sim_files/fitness_by_gen.png')
+  #[G.run_generation_no_events('../sim_files/current') for i in range(50)]
+  [G.run_generation('../sim_files/current') for i in range(100)]
+  #plt.savefig('../sim_files/fitness_by_gen.png')
   plt.show(block=True)
 
 
