@@ -11,6 +11,7 @@ except ImportError:
   pass 
 
 import pandas as pd
+import copy as cp
 import numpy as np
 import simulation2 as sim
 import os
@@ -23,7 +24,7 @@ class Genome(object):
   """class containing genome of target individual"""
 
   def __init__(self, Size, path_init, path_output="../sim_files/output", NO_PLOT=False,
-              sec_dist=77, indel_var=0, p_inv=.1, T0=0.001, nb_pol = 7):
+              sec_dist=60, indel_var=0, p_inv=.1, T0=0.001, nb_pol = 7):
 							
     self.Size = Size
     self.sec_dist = sec_dist # security distance of prot and genes
@@ -163,10 +164,10 @@ class Genome(object):
 
     for i, row in self.gene_info.iterrows():
       if row["TUorient"] == "+":
-        if p>row['TSS_pos'] and p<row['TTS_pos']:
+        if p>=row['TSS_pos'] and p<=row['TTS_pos']:
           return True
       else:
-        if p>row['TTS_pos'] and p<row['TSS_pos']:
+        if p>=row['TTS_pos'] and p<=row['TSS_pos']:
           return True
     return False
 
@@ -187,7 +188,7 @@ class Genome(object):
     """Returns size of fragment for deletion"""
         
     var = 0 if self.indel_var==0 else np.random.randint(-self.indel_var,self.indel_var)
-    return self.sec_dist + self.indel_var + var
+    return abs(self.sec_dist + self.indel_var + var)
 
 
   def insertion(self):
@@ -199,6 +200,8 @@ class Genome(object):
       p = np.random.randint(0, self.Size)
 
     l = self.frag_length()
+
+    print("ins pos,l : "+str([p,l]))
 
     # shift genes and barriers
     for i, row in self.gene_info.iterrows():
@@ -242,11 +245,13 @@ class Genome(object):
     p2 = p1 + np.random.choice([-1,1])*l
     s, e = np.sort([p1,p2]) 
 
-    while not self.good_inv_pos(s,e) or not self.barr_between_pos(s,e) or (s <= 0 <= e) or e > self.Size:
+    while not self.good_inv_pos(s,e) or self.barr_between_pos(s,e) or s <= 0 or e > self.Size:
       l = self.frag_length()
       p1 = np.random.randint(0, self.Size)
       p2 = p1 + np.random.choice([-1,1])*l
       s, e = np.sort([p1,p2]) 
+
+    print("del pos : "+str([s,e]))
 
     # shift genes and barriers
     for i, row in self.gene_info.iterrows():
@@ -279,11 +284,14 @@ class Genome(object):
     """inversion between two good positions given by get_inv_pos"""
     
     start_inv,end_inv = self.get_inv_pos()
+
+    print("inv pos : "+str([start_inv,end_inv]))
+
     genes_to_inv = self.find_genes(start_inv,end_inv)
-    genes_copy = self.gene_info.copy()
+    genes_copy = cp.deepcopy(self.gene_info)
     if len(genes_to_inv) :
       for ind in genes_to_inv:
-        gene = self.gene_info.iloc[ind,:].copy()
+        gene = cp.deepcopy(self.gene_info.iloc[ind,:])
         #change gene start and gene end
         genes_copy.at[ind,"TSS_pos"] = end_inv - (gene["TSS_pos"] - start_inv)
         genes_copy.at[ind,"TTS_pos"] = start_inv + end_inv - gene["TTS_pos"]
@@ -328,8 +336,8 @@ class Genome(object):
     print("\n\n----\n")
 
     #keep old info in case mutation is BAAAAAD.
-    old_gene_info = self.gene_info.copy()
-    old_prot = self.prot.copy()
+    old_gene_info = cp.deepcopy(self.gene_info)
+    old_prot = cp.deepcopy(self.prot)
 
     #choose event
     event = np.random.choice(['inv', 'ins', 'del'], p=[self.p_inv, (1-self.p_inv)/2, (1-self.p_inv)/2])
@@ -352,6 +360,12 @@ class Genome(object):
     self.generation += 1
     print("Now at generation", self.generation)
 
+    print("Modified genome :")
+    print(self.Size)
+    print(self.gene_info)
+    print(self.prot)
+    print("---------\n")
+
     # run simulation
     sim.start_transcribing('../sim_files/current/params.ini', "../sim_files/future")
     fit, fut = self.fitness("../sim_files/future/save_tr_nbr.csv")
@@ -367,8 +381,8 @@ class Genome(object):
       p = np.exp(-deltaU/self.T0)
       # with proba p, keep it. So if rd>p, reset
       if np.random.random() > p :
-        self.gene_info = old_gene_info
-        self.prot = old_prot
+        self.gene_info = cp.deepcopy(old_gene_info)
+        self.prot = cp.deepcopy(old_prot)
         self.fit_bygeneration[self.generation] = self.fit_bygeneration[self.generation-1]
         keep = False
       
@@ -378,6 +392,8 @@ class Genome(object):
     if fit > self.best_fit :
       self.best = [self.gene_info, self.prot]
       self.best_fit = fit
+
+
 
     # plot fitness
     # print(list(range(self.generation+1)), self.fit_bygeneration)
