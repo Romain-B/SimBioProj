@@ -201,7 +201,7 @@ class Genome(object):
 
     l = self.frag_length()
 
-    print("ins pos,l : "+str([p,l]))
+    #print("ins pos,l : "+str([p,l]))
 
     # shift genes and barriers
     for i, row in self.gene_info.iterrows():
@@ -251,7 +251,7 @@ class Genome(object):
       p2 = p1 + np.random.choice([-1,1])*l
       s, e = np.sort([p1,p2]) 
 
-    print("del pos : "+str([s,e]))
+    #print("del pos : "+str([s,e]))
 
     # shift genes and barriers
     for i, row in self.gene_info.iterrows():
@@ -285,7 +285,7 @@ class Genome(object):
     
     start_inv,end_inv = self.get_inv_pos()
 
-    print("inv pos : "+str([start_inv,end_inv]))
+    #print("inv pos : "+str([start_inv,end_inv]))
 
     genes_to_inv = self.find_genes(start_inv,end_inv)
     genes_copy = cp.deepcopy(self.gene_info)
@@ -360,11 +360,11 @@ class Genome(object):
     self.generation += 1
     print("Now at generation", self.generation)
 
-    print("Modified genome :")
-    print(self.Size)
-    print(self.gene_info)
-    print(self.prot)
-    print("---------\n")
+    # print("Modified genome :")
+    # print(self.Size)
+    # print(self.gene_info)
+    # print(self.prot)
+    # print("---------\n")
 
     # run simulation
     sim.start_transcribing('../sim_files/current/params.ini', "../sim_files/future")
