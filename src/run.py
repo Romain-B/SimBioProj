@@ -26,10 +26,10 @@ for i, row in plan.iterrows():
   
   G = Genome(30000, '../sim_files/init', indel_var=indel_var[row['indel_var']], 
   	  p_inv=p_inv[row['p_inv']], T0=T0[row['T0']], nb_pol=nb_pol[row['nb_pol']], path_output = '../sim_files/output/'+row['alias'], NO_PLOT = True)
-  [G.run_generation_no_events('../sim_files/current') for i in range(nb_iter['nb_iter'])]
+  [G.run_generation_no_events('../sim_files/current') for i in range(len_noise)]
 
   try :
-    [G.run_generation('../sim_files/current') for i in range(len_simu)]
+    [G.run_generation('../sim_files/current') for i in range(nb_iter[row['nb_iter']])]
     # to see how look like the best genome we made
     G.write_gb_file("../sim_files/output/"+row['alias']+"/best_genome.gb")
     l =['Best genome found\n\n', str(G.best[0]), 
@@ -42,6 +42,7 @@ for i, row in plan.iterrows():
   # keep info about the failing genome
   except :
     print('------------ in except ------------')
+    print('NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
     nfails += 1
     G.write_gb_file("../sim_files/output/"+row['alias']+"/bad_genome.gb")
     l =['Failling genome\n\n', str(G.best[0]), 
