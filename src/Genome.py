@@ -21,15 +21,27 @@ import csv
 
 
 class Genome(object):
-  """class containing genome of target individual"""
+  """
+  Class containing genome of target individual.
+  Parameters used in simulations and evolution are to be fixed and given as
+  input to initialize object.
+
+  Parameters include :
+    - Genome size, 
+    - sec_dist (Transcription unit, security distance between genome elements)
+    - indel_var (Variability of indel size)
+    - p_inv (Inversion probability. Note that p_ins = p_del = (1-p_inv)/2)
+    - T0 (Scaling of probability to accept negative fitness change)
+    - nb_pol (number of ARN-pol used in transcription simulation, must be < to nb of genes)
+  """
 
   def __init__(self, Size, path_init, path_output="../sim_files/output", NO_PLOT=False,
               sec_dist=60, indel_var=0, p_inv=.1, T0=0.001, nb_pol = 7):
 							
     self.Size = Size
-    self.sec_dist = sec_dist # security distance of prot and genes
-    self.indel_var = indel_var # variance of indel sizes (MUST BE < sec_dist )
-    self.p_inv = p_inv # p_inser = (1-p_inv)/2 = p_del
+    self.sec_dist = sec_dist 
+    self.indel_var = indel_var 
+    self.p_inv = p_inv 
     self.change_RNAPS(nb_pol, sec_dist) # change number of PRNA and the security distance in params.ini
     self.generation = 0 # generation counter
     self.evs = [None] # events occurred by generation
@@ -46,45 +58,46 @@ class Genome(object):
     if not os.path.exists(self.path_output):
       os.makedirs(self.path_output)
 
-    #self.path_to_simulator = path_to_simulator
-
     self.NO_PLOT = NO_PLOT
 
     self.fit_bygeneration = []
-    self.T0 = T0 # linked to fitness decrease prob. 
+    self.T0 = T0 
 
     copy2(self.path_init+'/params.ini','../sim_files/current/params.ini')
-#    print(subprocess.check_output(['cp', path_init+'/params.ini', '../sim_files/current/params.ini']))
-    # running for time 0
+
     self.write_sim_files("../sim_files/current")
-    ## Run simulation
+
+    # Reset the simulation data file if it exists.
+    try:
+      os.remove(self.gene_out)
+    except OSError:
+      pass
+    open(self.gene_out, 'w').close()
+    self.gene_expr_history("fit", 
+                           ["g0","g1","g2", "g3", "g4","g5", "g6", "g7", "g8", "g9"], 
+                           "event", "keep", g="gen")
+    
+    ## Run simulation 0
     sim.start_transcribing('../sim_files/current/params.ini', "../sim_files/future")
 
     fit, fut = self.fitness("../sim_files/future/save_tr_nbr.csv")
     self.fit_bygeneration.append(fit)
 
-    try:
-      os.remove(self.gene_out)
-    except OSError:
-      pass
-
-    open(self.gene_out, 'w').close()
-
-    ##########################""
-    # CHANGE THIS
-    self.gene_expr_history("fit", ["g0","g1","g2", "g3", "g4","g5", "g6", "g7", "g8", "g9"], "event", "keep", g="gen")
     self.gene_expr_history(fit, fut, "NoE", "NA")
 
-    # soso's best genome thingy
+    # Keep track of best genome
     self.best = [self.gene_info, self.prot]
     self.best_fit = fit
 
     if not NO_PLOT:
-      # mega plot genome of the future
+      # Plot the genome using our draw_genome.py
       self.plot_current_genome()
 
 
   def __str__(self):
+    """
+    Allows for easy printing of genome elements.
+    """
     s = "Genome Info :\n--------------\n"
     s += "Size : "+str(self.Size)+"\n"
     s += "Gene Info : \n"+str(self.gene_info)+"\n\n"
@@ -93,8 +106,11 @@ class Genome(object):
 
 
   def nearest_obj_distance(self, p):
-    """Needed to ensure that genes and barriers don't become less that sec_dist apart."""
-    # dist gene, dist barrier
+    """ 
+    Takes a position p, returns nearest distance with nearest gene and barrier.
+    This is needed to ensure that genes and barriers don't become less that sec_dist apart.
+    """
+
     d_g = self.Size
     d_b = self.Size
 
@@ -109,7 +125,7 @@ class Genome(object):
         d_b = abs(row['prot_pos'] - p)
 
     
-    ####### for extremities of genome cases :
+    ## for extremities of genome cases :
     # max pos of a gene
     gmax = max(max(self.gene_info['TTS_pos']),max(self.gene_info['TSS_pos'])) 
     #idem min
@@ -141,7 +157,10 @@ class Genome(object):
 
 
   def good_inv_pos(self, s, e):
-    """checks is inversion positions are ok."""
+    """
+    Takes a start and end position (s, e) and checks if they're ok
+    for inversion.
+    """
     
     # check if pos is in gene
     if self.pos_in_gene(s) or self.pos_in_gene(e) :
@@ -160,7 +179,9 @@ class Genome(object):
     return True
 
   def pos_in_gene(self, p):
-    """Returns True if position is in a gene"""
+    """
+    Returns True if position p is in a gene.
+    """
 
     for i, row in self.gene_info.iterrows():
       if row["TUorient"] == "+":
@@ -173,7 +194,9 @@ class Genome(object):
 
 
   def get_inv_pos(self):
-    """Returns 2 good positions for inversion"""
+    """
+    Returns 2 good positions for inversion.
+    """
 
     s,e = np.sort(np.random.randint(0, self.Size, size=2))
     i=0
@@ -185,14 +208,19 @@ class Genome(object):
   
 
   def frag_length(self):
-    """Returns size of fragment for deletion"""
+    """
+    Returns size of fragment for insertion or deletion 
+    (with respect to indel_var).
+    """
         
     var = 0 if self.indel_var==0 else np.random.randint(-self.indel_var,self.indel_var)
     return abs(self.sec_dist + self.indel_var + var)
 
 
   def insertion(self):
-    """insertion of fragment of random length"""
+    """
+    Insertion event in the genome.
+    """
         
     p = np.random.randint(0, self.Size)
 
@@ -200,8 +228,6 @@ class Genome(object):
       p = np.random.randint(0, self.Size)
 
     l = self.frag_length()
-
-    #print("ins pos,l : "+str([p,l]))
 
     # shift genes and barriers
     for i, row in self.gene_info.iterrows():
@@ -215,11 +241,13 @@ class Genome(object):
         self.prot.iloc[i, self.prot.columns.get_loc('prot_pos')]+= l
 
     self.Size += l
-    #return p,l
 
 
   def barr_between_pos(self, s, e):
-    """Returns True if there is a barrier between argument positions"""
+    """
+    Returns True if there is a barrier between argument positions.
+    This is needed to ensure deletions don't remove barriers.
+    """
         
     for i, row in self.prot.iterrows():
       if row['prot_pos'] > s and row['prot_pos'] <= e:
@@ -227,7 +255,10 @@ class Genome(object):
     return False
   
   def get_barr_between_pos(self, s, e):
-    """Returns indices of barriers between argument positions"""
+    """
+    Returns indices of barriers between argument positions.
+    This is useful during inversion
+    """
         
     barrs = []
     for i, row in self.prot.iterrows():
@@ -236,7 +267,9 @@ class Genome(object):
     return barrs
 
   def deletion(self):
-    """deletion of fragment"""
+    """
+    Deletion event in the genome.
+    """
         
     l = self.frag_length()
 
@@ -251,7 +284,6 @@ class Genome(object):
       p2 = p1 + np.random.choice([-1,1])*l
       s, e = np.sort([p1,p2]) 
 
-    #print("del pos : "+str([s,e]))
 
     # shift genes and barriers
     for i, row in self.gene_info.iterrows():
@@ -265,27 +297,28 @@ class Genome(object):
         self.prot.iloc[i, self.prot.columns.get_loc('prot_pos')]-= l
 
     self.Size -= l
-    #return s,l
 
   def find_genes(self,s,e):
-    """Returns list of all genes between positions s and e"""
+    """
+    Takes a start and end position (s, e), returns a list of all genes in between.
+    """
     
     genes_list = []
     for index,row in self.gene_info.iterrows(): #iterate over all start positions
       start_gene = row["TSS_pos"]
       if start_gene >= s and start_gene <= e:
         genes_list.append(index)
-    #no need to check for end of genes because find_genes is used only
-    #for inversions and inversions will never cut a gene
+    # Note : no need to check for end of genes because find_genes is used only
+    #        for inversions and inversions will never cut a gene
     return genes_list
           
   
   def inversion(self):
-    """inversion between two good positions given by get_inv_pos"""
+    """
+    Inversion event in the genome.
+    """
     
     start_inv,end_inv = self.get_inv_pos()
-
-    #print("inv pos : "+str([start_inv,end_inv]))
 
     genes_to_inv = self.find_genes(start_inv,end_inv)
     genes_copy = cp.deepcopy(self.gene_info)
@@ -313,7 +346,10 @@ class Genome(object):
       
 
   def write_sim_files(self, path_to_sim):
-    #TSS
+    """
+    Takes the path to simulation folder and writes the current genome to
+    TSS, TTS, prot and gff files.
+    """
     self.gene_info.to_csv(path_to_sim+'/TSS.dat', sep="\t", columns=['TUindex', 'TUorient', 'TSS_pos', 'TSS_strength'], index=False)
     self.gene_info.to_csv(path_to_sim+'/TTS.dat', sep="\t", columns=['TUindex', 'TUorient', 'TTS_pos', 'TTS_proba_off'], index=False)
     self.prot.to_csv(path_to_sim+'/prot.dat', sep="\t", index=False)
@@ -331,7 +367,16 @@ class Genome(object):
 
 
   def run_generation(self, path_to_sim, plot_it=True, plot_gen=10):
-    # EXACTLY ONE event per generation, determined by prob p_inv.
+    """
+    Takes the path to simulation folder and plot boolean arguments.
+    Runs one generation. One generation implies :
+      - Do one of the 3 events according to their probability
+      - Write new genome to simulation files
+      - Run the simulation 
+      - Check output and compute fitness
+      - Decide if new genome is kept or not.
+    """
+  
     
     print("\n\n----\n")
 
@@ -359,12 +404,6 @@ class Genome(object):
     # update gen counter
     self.generation += 1
     print("Now at generation", self.generation)
-
-    # print("Modified genome :")
-    # print(self.Size)
-    # print(self.gene_info)
-    # print(self.prot)
-    # print("---------\n")
 
     # run simulation
     sim.start_transcribing('../sim_files/current/params.ini', "../sim_files/future")
@@ -394,23 +433,23 @@ class Genome(object):
       self.best_fit = fit
 
 
-
     # plot fitness
-    # print(list(range(self.generation+1)), self.fit_bygeneration)
-
     if not self.NO_PLOT:
       if plot_it :
         self.plot_sim()
         plt.pause(0.001)
 
+      # plot genome
       if (self.generation % plot_gen) == 0:
         self.plot_current_genome()
 
   
   def run_generation_no_events(self, path_to_sim, plot_it=True):
-    # To check variability of fitness for the same genome
-    # EXACTLY ONE event per generation, determined by prob p_inv.
-    
+    """
+    See documentation for run_generation() function.
+    This essentially does the same thing, save for the mutation event on the genome.
+    Allows to check for noise in transcription profiles.
+    """
     print("\n\n----\n")
 
     self.evs.append('no')
@@ -432,13 +471,17 @@ class Genome(object):
 
     # plot fitness
     if not self.NO_PLOT:
-
       if plot_it :
         self.plot_sim()
         plt.pause(0.001)
 
 
   def gene_expr_history(self, fit, fut, ev, keep, g=None):
+    """
+    Takes current computed fitness (fit), relative gene expression (fut), last event (ev)
+    and wether the mutation is kept or not (keep).
+    Writes this info in gene_expr.csv file.
+    """
     
     g = self.generation if g is None else g
     line = [g]+[ev]+[fit]+[keep]+list(fut)
@@ -450,7 +493,9 @@ class Genome(object):
 
 
   def plot_sim(self):
-
+    """
+    Plots the fitness by generation in real time, indicates mutation events on plot.
+    """
     gens = list(range(self.generation+1))
     p1, = plt.plot(gens, self.fit_bygeneration, lw=1, c='k')
     cols = ['r', 'g','b']
@@ -467,7 +512,11 @@ class Genome(object):
 
 
   def fitness(self, path_to_sim):
-    """returns fitness of individual"""
+    """
+    Takes path to simulation folder.
+    Computes fitness of modified genome from simulation output.
+    Returns fitness and relative gene expression levels (ordered g0->g9).
+    """
     
     #takes expression profile stored after simulation at path_to_sim
     future = pd.read_table(path_to_sim, header=None).iloc[:,0]
@@ -476,14 +525,17 @@ class Genome(object):
     future = 1.0*future.iloc[:,0]
     ideal = self.env.iloc[:,1]
     future = future/sum(future)
-    #fit = np.exp(-sum((future-ideal)/ideal))
+    # Old fitness function := np.exp(-sum((future-ideal)/ideal))
     fit = np.exp(-sum(abs(np.log(future/ideal))))
 
     return fit, future
 
 
   def write_gb_file(self, path):
-    
+    """
+    Takes a path to the plot directory.
+    Generates a genbank file from current genome, used by our plot_genome function.
+    """
 
     s5 = '     ' # before feature name
     s7 = '       '
@@ -512,12 +564,20 @@ class Genome(object):
 
 
   def plot_current_genome(self, title="genome_plot"):
+    """
+    Plots current genome.
+    """
     path = "../plotting/"+title+"_gen_"+str(self.generation)+'.gb'
     self.write_gb_file(path)
     plot_genome(path)
 		
+
+
   def change_RNAPS(self, nb_pol, sec_dist):
-    """it modifies the number of polymerases and the security distance in param.ini"""
+    """
+    Takes a number of RNA-pols and a transcsription unit size.
+    Modifies their associated values in param.ini for simulation.
+    """
     f = open(r'../sim_files/init/params.ini', 'r')
     lines = f.readlines()
     lines[26] = "RNAPS_NB = "+str(nb_pol)+'\n'
