@@ -12,3 +12,4 @@ To allow for graphical representation of the genome, we generated dummy genebank
 The resulting images are in the `plotting/` folder. 
 Please note that, as of now, the default setting for `run_generation()` is to plot the genome every 10 generation (which may result in quite a bit of outputs for larger simulations), tweak the  `plot_gen` parameter if needed.
 
+The main code elements are in `src/Genome.py`.
