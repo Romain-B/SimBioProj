@@ -477,7 +477,7 @@ class Genome(object):
     ideal = self.env.iloc[:,1]
     future = future/sum(future)
     #fit = np.exp(-sum((future-ideal)/ideal))
-    fit = np.exp(-sum(np.log(future/ideal)))
+    fit = np.exp(-sum(abs(np.log(future/ideal))))
 
     return fit, future
 
